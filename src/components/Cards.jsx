@@ -1,9 +1,11 @@
-import { useRef } from 'react'
+import { lazy, Suspense, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { CARDS } from '../content'
 import { useCardImage } from './CardFallback'
 import { useDemo } from '../lib/demo'
-import { useReducedMotionMQ, useIsCoarsePointer } from '../three/hooks'
+import { useReducedMotionMQ, useIsCoarsePointer, useIsMobile, useFontsReady, hasWebGL, useCanvasVisibility } from '../three/hooks'
+
+const StackScene = lazy(() => import('../three/StackScene'))
 
 // Cartão com perspectiva CSS vertical que responde suavemente ao ponteiro
 function TiltCard({ variant, name }) {
@@ -51,12 +53,34 @@ function TiltCard({ variant, name }) {
 
 export default function Cards() {
   const demo = useDemo()
+  const mobile = useIsMobile()
+  const reduced = useReducedMotionMQ()
+  const fonts = useFontsReady()
+  const [gl] = useState(() => hasWebGL())
+  const stageRef = useRef(null)
+  const isVisible = useCanvasVisibility(stageRef, '120px')
+  const progress = useRef(0.48)
+
   return (
     <section className="cards" id="cartoes">
       <div className="head">
         <h2>{CARDS.title}</h2>
         <p>{CARDS.lead}</p>
       </div>
+
+      {mobile && gl && fonts && (
+        <div className="cards-mobile-stage" ref={stageRef} aria-hidden="true">
+          <Suspense fallback={null}>
+            <StackScene
+              progress={progress}
+              running={isVisible}
+              reduced={reduced}
+              mobile={true}
+            />
+          </Suspense>
+        </div>
+      )}
+
       <ul className="cards-grid">
         {CARDS.items.map((c, i) => (
           <motion.li

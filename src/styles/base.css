@@ -38,9 +38,11 @@ a {
   color: inherit;
 }
 img,
+video,
 canvas,
 svg {
   display: block;
+  max-width: 100%;
 }
 canvas {
   touch-action: pan-y !important;
@@ -89,7 +91,12 @@ strong,
 b,
 .ps-balance,
 .ps-card strong,
-.hero-notes b {
+.hero-notes b,
+.nu-balance-val,
+.nu-invoice-val,
+.nu-loan-val,
+.nu-stat-num,
+[data-tabular] {
   font-variant-numeric: tabular-nums;
 }
 
@@ -172,12 +179,12 @@ b,
   align-items: center;
   gap: 12px;
   padding: 0 9px 0 22px;
-  background: rgba(255, 255, 255, 0.78);
-  -webkit-backdrop-filter: blur(16px) saturate(1.4);
-  backdrop-filter: blur(16px) saturate(1.4);
-  border: 1px solid rgba(21, 16, 28, 0.06);
+  background: #070709cc;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 999px;
-  box-shadow: 0 6px 24px rgba(21, 16, 28, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
 }
 .pill-logo {
   display: flex;
@@ -185,6 +192,7 @@ b,
 }
 .pill-logo .numark {
   font-size: 32px;
+  color: var(--nu);
 }
 .pill-links {
   display: flex;
@@ -198,13 +206,13 @@ b,
   border-radius: 999px;
   font-size: 14.5px;
   font-weight: 600;
-  color: var(--ink-3);
+  color: var(--on-night-2);
   text-decoration: none;
   transition: color 0.2s;
 }
 .pill-links a:hover,
 .pill-links a[aria-current] {
-  color: var(--ink);
+  color: #fff;
 }
 .pill-links a span {
   position: relative;
@@ -214,9 +222,9 @@ b,
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.12);
   border-radius: 999px;
-  box-shadow: 0 1px 4px rgba(21, 16, 28, 0.1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 .pill-actions {
   display: flex;
@@ -229,13 +237,13 @@ b,
   padding: 8px 14px;
   font-size: 14.5px;
   font-weight: 600;
-  color: var(--ink-2);
+  color: var(--on-night-2);
   cursor: pointer;
   border-radius: 999px;
   transition: color 0.2s;
 }
 .pill-text:hover {
-  color: var(--nu);
+  color: var(--nu-soft);
 }
 .pill-menu {
   display: none;
@@ -248,12 +256,12 @@ b,
   background: transparent;
   border-radius: 50%;
   cursor: pointer;
-  color: var(--ink);
+  color: #fff;
   transition: background-color 0.2s, color 0.2s;
 }
 .pill-menu:hover,
 .pill-menu:focus-visible {
-  background: rgba(21, 16, 28, 0.08);
+  background: rgba(255, 255, 255, 0.1);
 }
 .sheet {
   pointer-events: auto;
@@ -263,12 +271,12 @@ b,
   display: flex;
   flex-direction: column;
   gap: 6px;
-  background: rgba(18, 18, 22, 0.96);
-  -webkit-backdrop-filter: blur(20px) saturate(1.4);
-  backdrop-filter: blur(20px) saturate(1.4);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #0B0B0F;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 24px;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7);
   animation: sheet-in 0.3s var(--ease);
 }
 .sheet a {

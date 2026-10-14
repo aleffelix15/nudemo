@@ -32,6 +32,15 @@ export default function AppSection() {
           <button
             type="button"
             role="tab"
+            aria-selected={activeTab === 'image'}
+            className={`app-mode-tab ${activeTab === 'image' ? 'is-active' : ''}`}
+            onClick={() => setActiveTab('image')}
+          >
+            Captura Real
+          </button>
+          <button
+            type="button"
+            role="tab"
             aria-selected={activeTab === 'ecosystem'}
             className={`app-mode-tab ${activeTab === 'ecosystem' ? 'is-active' : ''}`}
             onClick={() => setActiveTab('ecosystem')}
@@ -52,7 +61,20 @@ export default function AppSection() {
               >
                 <Phone
                   screen="dark"
-                  alt="Interface real do aplicativo Nubank em Modo Escuro"
+                  alt="Interface nativa em alta nitidez do aplicativo Nubank em Modo Escuro"
+                />
+              </motion.div>
+            ) : activeTab === 'image' ? (
+              <motion.div
+                key="image"
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <Phone
+                  screen="image"
+                  alt="Captura de tela real do aplicativo Nubank em Modo Escuro"
                 />
               </motion.div>
             ) : (

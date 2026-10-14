@@ -30,6 +30,16 @@ export default function Phone({
               decoding="async"
             />
           </div>
+        ) : screen === 'image' ? (
+          <div className="phone-screen-img-frame">
+            <img
+              src="/assets/app-dark-screen.jpg"
+              alt={alt}
+              className="phone-screen-img"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
         ) : (
           <div className="nu-app-native" aria-label="Tela inicial do aplicativo Nubank em Modo Escuro">
             {/* Barra de Status */}

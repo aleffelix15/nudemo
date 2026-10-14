@@ -25,7 +25,7 @@ export function createCardKit(maxAniso = 16) {
   const chipMat = keep(
     new THREE.MeshStandardMaterial({
       map: chipTex,
-      metalness: 0.85,
+      metalness: 0.88,
       roughness: 0.20,
       color: '#D4D4D8',
       envMapIntensity: 1.4,

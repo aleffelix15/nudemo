@@ -58,7 +58,7 @@ export default function Header() {
             className="pill-menu"
             aria-expanded={open}
             aria-controls="menu-mobile"
-            aria-label={open ? 'Fechar menu de navegação' : 'Abrir menu de navegação'}
+            aria-label="Menu principal"
             onClick={() => setOpen((o) => !o)}
           >
             <Icon name={open ? 'close' : 'menu'} />
