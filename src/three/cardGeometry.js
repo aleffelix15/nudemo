@@ -5,7 +5,7 @@ import * as THREE from 'three'
 export const CARD = {
   w: 2.159,
   h: 3.424,
-  depth: 0.024, // espessura fina e realista (~0.02 unidades)
+  depth: 0.024, // espessura de policarbonato (~0.02 unidades)
   bevel: 0.0035, // chanfro microscópico para capturar rim light
   radius: 0.13, // cantos arredondados suaves (~0.06 da largura)
 }
@@ -59,14 +59,23 @@ export function makeFaceGeometry(inset = CARD.bevel) {
   return g
 }
 
-// Chip EMV metálico proporcional à referência física
-export function makeChipGeometry(w = 0.286, h = 0.219, r = 0.035) {
-  const g = new THREE.ShapeGeometry(roundedRect(w, h, r), 16)
+// Chip EMV metálico com relevo físico 3D real e bordas chanfradas
+export function makeChipGeometry(w = 0.307, h = 0.236, r = 0.038, depth = 0.0018) {
+  const g = new THREE.ExtrudeGeometry(roundedRect(w, h, r), {
+    depth,
+    bevelEnabled: true,
+    bevelThickness: 0.0006,
+    bevelSize: 0.0006,
+    bevelSegments: 2,
+    curveSegments: 16,
+  })
+  g.translate(0, 0, -depth / 2)
   const pos = g.attributes.position
   const uv = g.attributes.uv
   for (let i = 0; i < pos.count; i++) {
     uv.setXY(i, pos.getX(i) / w + 0.5, pos.getY(i) / h + 0.5)
   }
   uv.needsUpdate = true
+  g.computeVertexNormals()
   return g
 }

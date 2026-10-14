@@ -2,8 +2,7 @@ import { lazy, Suspense, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { HERO } from '../content'
 import { useDemo } from '../lib/demo'
-import { hasWebGL, useInView, useIsMobile, useReducedMotionMQ } from '../three/hooks'
-import { useFontsReady } from '../three/hooks'
+import { hasWebGL, useCanvasVisibility, useIsMobile, useReducedMotionMQ, useFontsReady } from '../three/hooks'
 import CardFallback from './CardFallback'
 
 const HeroScene = lazy(() => import('../three/HeroScene'))
@@ -16,7 +15,7 @@ const line = {
 export default function Hero() {
   const demo = useDemo()
   const stage = useRef(null)
-  const inView = useInView(stage, '80px')
+  const isVisible = useCanvasVisibility(stage, '100px')
   const mobile = useIsMobile()
   const reduced = useReducedMotionMQ()
   const fonts = useFontsReady()
@@ -24,29 +23,59 @@ export default function Hero() {
   const [ready, setReady] = useState(false)
 
   return (
-    <section className="hero" id="topo">
+    <section className="hero" id="topo" aria-label="Apresentação do Nubank">
       <div className="hero-copy">
         <h1 className="hero-title" aria-label={HERO.title.join(' ')}>
           {HERO.title.map((t, i) => (
             <span className="mask" key={t} aria-hidden="true">
-              <motion.span className={`mask-in ${i === 1 ? 'is-accent' : ''}`} variants={line} custom={i} initial={reduced ? 'show' : 'hidden'} animate="show">
+              <motion.span
+                className={`mask-in ${i === 1 ? 'is-accent' : ''}`}
+                variants={line}
+                custom={i}
+                initial={reduced ? 'show' : 'hidden'}
+                animate="show"
+              >
                 {t}
               </motion.span>
             </span>
           ))}
         </h1>
-        <motion.p className="hero-lead" initial={reduced ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55, duration: 0.7 }}>
+
+        <motion.p
+          className="hero-lead"
+          initial={reduced ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.55, duration: 0.7 }}
+        >
           {HERO.lead}
         </motion.p>
-        <motion.div className="hero-cta" initial={reduced ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}>
-          <button type="button" className="btn btn-primary" onClick={() => demo()}>
+
+        <motion.div
+          className="hero-cta"
+          initial={reduced ? false : { opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <button
+            type="button"
+            className="btn btn-primary"
+            aria-label="Abrir conta digital no Nubank"
+            onClick={() => demo('Abrir conta', 'Demonstração de abertura de conta digital.')}
+          >
             {HERO.primary}
           </button>
-          <a className="btn btn-ghost" href="#app">
+          <a className="btn btn-ghost" href="#app" aria-label="Conhecer o aplicativo do Nubank">
             {HERO.secondary}
           </a>
         </motion.div>
-        <motion.ul className="hero-notes" initial={reduced ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.85, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}>
+
+        <motion.ul
+          className="hero-notes"
+          aria-label="Destaques do serviço"
+          initial={reduced ? false : { opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.85, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        >
           {HERO.notes.map((n) => (
             <li key={n.title}>
               <b>{n.title}</b>
@@ -59,7 +88,12 @@ export default function Hero() {
       <div className={`hero-stage ${ready ? 'is-ready' : ''}`} ref={stage}>
         {gl && fonts ? (
           <Suspense fallback={null}>
-            <HeroScene reduced={reduced} interactive={!mobile} running={inView} onReady={() => setReady(true)} />
+            <HeroScene
+              reduced={reduced}
+              interactive={!mobile}
+              running={isVisible}
+              onReady={() => setReady(true)}
+            />
           </Suspense>
         ) : null}
         {(!gl || !ready) && <CardFallback />}

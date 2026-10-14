@@ -21,12 +21,30 @@ export function useInView(ref, margin = '100px') {
   const [v, setV] = useState(false)
   useEffect(() => {
     const el = ref.current
-    if (!el) return
+    if (!el || typeof IntersectionObserver === 'undefined') return
     const io = new IntersectionObserver(([e]) => setV(e.isIntersecting), { rootMargin: margin })
     io.observe(el)
     return () => io.disconnect()
   }, [ref, margin])
   return v
+}
+
+// Hook de visibilidade dedicado para controle de ciclo de vida e economia de GPU nas cenas WebGL
+export function useCanvasVisibility(ref, margin = '120px') {
+  const [visible, setVisible] = useState(true)
+  useEffect(() => {
+    const el = ref?.current
+    if (!el || typeof IntersectionObserver === 'undefined') return
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        setVisible(entry.isIntersecting)
+      },
+      { rootMargin: margin }
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [ref, margin])
+  return visible
 }
 
 export function hasWebGL() {

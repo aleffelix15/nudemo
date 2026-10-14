@@ -33,7 +33,8 @@ const NuCard = forwardRef(function NuCard({ kit, variant = 0 }, ref) {
       <mesh
         geometry={kit.chipGeo}
         material={kit.chipMat}
-        position={[CHIP_POS.x, CHIP_POS.y, CARD_FACE_Z + 0.001]}
+        position={[CHIP_POS.x, CHIP_POS.y, CARD_FACE_Z + 0.0015]}
+        castShadow
       />
       <mesh
         ref={back}

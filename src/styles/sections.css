@@ -230,196 +230,381 @@ h3 {
   color: var(--ink);
 }
 
-/* ===== celular ===== */
+/* ===== celular em titânio escuro (#1E1E24) e interface autêntica ===== */
+.phone-chassis,
 .phone {
-  --scr: #070709;
-  --scr-2: #121216;
-  --scr-ink: #f4f4f6;
-  --scr-mute: #a1a1aa;
-  --scr-line: rgba(255, 255, 255, 0.08);
   position: relative;
-  width: 292px;
-  aspect-ratio: 9 / 18.6;
-  border-radius: 46px;
+  width: 300px;
+  height: 618px;
+  border-radius: 42px;
   padding: 10px;
-  background: #18141f;
-  box-shadow: inset 0 0 0 1.5px #3a3344, 0 32px 64px rgba(0, 0, 0, 0.55);
+  background: #1e1e24;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), inset 0 0 0 2px #121216, 0 32px 70px rgba(0, 0, 0, 0.7);
   z-index: 1;
+  user-select: none;
 }
-.phone-dark {
-  background: #110d18;
-  box-shadow: inset 0 0 0 1.5px #4a3e5c, 0 34px 68px rgba(0, 0, 0, 0.7);
-}
-.phone-notch {
+.phone-button {
   position: absolute;
-  z-index: 5;
-  top: 18px;
-  left: 50%;
-  width: 78px;
-  height: 22px;
-  transform: translateX(-50%);
-  border-radius: 999px;
-  background: #000000;
+  background: #2a2a32;
+  border-radius: 2px;
   pointer-events: none;
 }
-.phone-screen {
-  height: 100%;
-  border-radius: 36px;
-  background: var(--scr);
-  color: var(--scr-ink);
-  overflow: hidden;
-  position: relative;
+.phone-button-volume-up {
+  left: -3px;
+  top: 110px;
+  width: 3px;
+  height: 42px;
+  border-radius: 2px 0 0 2px;
 }
-.phone-screen-media {
-  padding: 0;
+.phone-button-volume-down {
+  left: -3px;
+  top: 162px;
+  width: 3px;
+  height: 42px;
+  border-radius: 2px 0 0 2px;
+}
+.phone-button-power {
+  right: -3px;
+  top: 130px;
+  width: 3px;
+  height: 56px;
+  border-radius: 0 2px 2px 0;
+}
+.phone-island {
+  position: absolute;
+  top: 17px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 78px;
+  height: 22px;
   background: #000000;
+  border-radius: 999px;
+  z-index: 25;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 12px;
 }
-.phone-media-frame {
+.phone-camera-lens {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #0d0f1a;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.phone-screen-viewport {
   width: 100%;
   height: 100%;
-  overflow: hidden;
-  border-radius: 36px;
+  border-radius: 34px;
   background: #000000;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Interface nativa do app Nubank em Dark Mode (100% nítida e fiel) */
+.nu-app-native {
+  width: 100%;
+  height: 100%;
+  background: #000000;
+  color: #f4f4f6;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font);
+  position: relative;
+  overflow: hidden;
+}
+.nu-status-bar {
+  height: 38px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 18px 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: #530082;
+}
+.nu-status-icons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.nu-status-4g {
+  font-size: 10px;
+  letter-spacing: 0.05em;
+}
+.nu-status-battery {
+  width: 16px;
+  height: 8px;
+  border: 1.2px solid #fff;
+  border-radius: 2px;
   position: relative;
 }
-.phone-display-img {
+.nu-status-battery::after {
+  content: '';
+  position: absolute;
+  right: -3px;
+  top: 2px;
+  width: 2px;
+  height: 3px;
+  background: #fff;
+  border-radius: 0 1px 1px 0;
+}
+.nu-app-header {
+  background: #530082;
+  padding: 6px 18px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.nu-avatar-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  display: grid;
+  place-items: center;
+  color: #fff;
+}
+.nu-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.nu-icon-btn {
+  background: none;
+  border: 0;
+  color: #fff;
+  padding: 0;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.nu-help-mark {
+  width: 18px;
+  height: 18px;
+  border: 1.6px solid #fff;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+.nu-app-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 18px 14px 68px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  scrollbar-width: none;
+}
+.nu-app-scroll::-webkit-scrollbar {
+  display: none;
+}
+.nu-block {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.nu-block-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #f4f4f6;
+}
+.nu-chevron {
+  color: #71717a;
+}
+.nu-balance-val {
+  font-size: 21px;
+  font-weight: 750;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+.nu-shortcuts-row {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+.nu-shortcuts-row::-webkit-scrollbar {
+  display: none;
+}
+.nu-shortcut {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 62px;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-align: center;
+  color: #f4f4f6;
+  position: relative;
+}
+.nu-shortcut-circle {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #16161c;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.nu-badge-pill {
+  position: absolute;
+  top: -6px;
+  background: #820ad1;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 5px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.nu-card-pill-btn {
+  background: #16161c;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  font-weight: 650;
+  color: #f4f4f6;
+}
+.nu-promo-card {
+  background: #16161c;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 11px;
+  color: #a1a1aa;
+  line-height: 1.35;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.nu-promo-card b {
+  color: #f4f4f6;
+}
+.nu-sublabel {
+  font-size: 11.5px;
+  color: #a1a1aa;
+}
+.nu-invoice-val,
+.nu-loan-val {
+  font-size: 19px;
+  font-weight: 750;
+  color: #fff;
+}
+.nu-limit-note {
+  font-size: 10.5px;
+  color: #a1a1aa;
+  margin-top: 2px;
+  display: block;
+}
+.nu-bottom-nav {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  pointer-events: none;
+}
+.nu-bottom-pill {
+  background: rgba(22, 22, 28, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+.nu-nav-active {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #820ad1;
+  display: grid;
+  place-items: center;
+  color: #fff;
+}
+.nu-nav-item {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  color: #a1a1aa;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* Card editorial de apresentação do Ecossistema Conta + Cartão */
+.editorial-eco-card {
+  width: 300px;
+  background: linear-gradient(150deg, #1b1624 0%, #100d16 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 30px;
+  padding: 14px 14px 16px;
+  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+.editorial-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--nu-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.editorial-img-frame {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.editorial-eco-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center center;
-  border-radius: 36px;
-  display: block;
 }
-/* Recorte CSS milimétrico das bordas externas de imagens de referência */
-.phone-display-dark {
-  transform: scale(1.085);
-  transform-origin: center center;
-}
-.phone-display-eco {
-  transform: scale(1.03);
-  transform-origin: center center;
-}
-.ps-status {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 0 8px;
-}
-.ps-status span:last-child {
-  color: var(--scr-mute);
-  font-weight: 600;
-}
-.ps-top {
-  margin-top: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.ps-logo {
-  font-size: 26px;
-}
-.ps-hello {
-  font-size: 13px;
-  font-weight: 650;
-}
-.ps-balance {
-  display: grid;
-  gap: 2px;
-}
-.ps-label {
+.editorial-caption {
   font-size: 11.5px;
-  color: var(--scr-mute);
-  font-weight: 550;
-}
-.ps-balance strong {
-  font-size: 30px;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
-}
-.ps-actions {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  color: var(--on-night-2);
   text-align: center;
-  font-size: 11px;
-  font-weight: 650;
-  gap: 4px;
+  font-weight: 500;
 }
-.ps-actions span {
-  display: grid;
-  justify-items: center;
-  gap: 5px;
-}
-.ps-actions i {
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
+.card-fallback-glow {
+  position: absolute;
+  width: 340px;
+  height: 340px;
   border-radius: 50%;
-  background: var(--scr-2);
-  color: var(--nu);
-  box-shadow: inset 0 0 0 1px var(--scr-line);
+  background: radial-gradient(circle, rgba(130, 10, 209, 0.28) 0%, rgba(130, 10, 209, 0) 70%);
+  pointer-events: none;
 }
-.phone-dark .ps-actions i {
-  color: var(--nu-soft);
-}
-.ps-card {
-  background: var(--nu);
-  color: #fff;
-  border-radius: 18px;
-  padding: 13px 14px;
-  display: grid;
-  gap: 8px;
-}
-.ps-card .ps-label {
-  color: rgba(255, 255, 255, 0.78);
-}
-.ps-card strong {
-  font-size: 20px;
-  letter-spacing: -0.02em;
-  display: block;
-}
-.ps-bar {
-  height: 5px;
-  border-radius: 99px;
-  background: rgba(255, 255, 255, 0.25);
-  overflow: hidden;
-}
-.ps-bar i {
-  display: block;
-  height: 100%;
-  background: #fff;
-  border-radius: inherit;
-}
-.ps-list {
-  display: grid;
-  gap: 2px;
-}
-.ps-list li {
+.card-fallback-frame {
+  position: relative;
+  z-index: 2;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  padding: 9px 0;
-  border-top: 1px solid var(--scr-line);
-  font-size: 12.5px;
-}
-.ps-list b {
-  display: block;
-  font-weight: 650;
-}
-.ps-list small {
-  color: var(--scr-mute);
-  font-size: 11px;
-}
-.ps-list em {
-  font-style: normal;
-  font-weight: 650;
-}
-.ps-list em.in {
-  color: #14935a;
-}
-.phone-dark .ps-list em.in {
-  color: #4cd49b;
 }
 
 /* ===== acompanhe (celular com rastro) ===== */

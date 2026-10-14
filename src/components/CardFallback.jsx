@@ -21,15 +21,28 @@ export default function CardFallback() {
   const src = useCardImage(0, 600)
   return (
     <div className="card-fallback" role="img" aria-label="Cartão de crédito Nubank">
-      {src && (
-        <img
-          src={src}
-          alt="Cartão físico Nubank demonstrativo"
-          width="400"
-          height="634"
-          className="fallback-card-img"
-        />
-      )}
+      <div className="card-fallback-glow" aria-hidden="true" />
+      <div className="card-fallback-frame">
+        {src ? (
+          <img
+            src={src}
+            alt="Cartão físico Nubank demonstrativo"
+            width="360"
+            height="571"
+            className="fallback-card-img"
+          />
+        ) : (
+          <div className="editorial-eco-card">
+            <div className="editorial-img-frame">
+              <img
+                src="/assets/app-light-and-card-ref.jpg"
+                alt="Cartão e Aplicativo Nubank"
+                className="editorial-eco-img"
+              />
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

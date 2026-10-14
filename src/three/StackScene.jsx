@@ -44,7 +44,7 @@ function Ghost({ kit, refObj }) {
   )
 }
 
-function Scene({ progress, copies, reduced }) {
+function Scene({ progress, copies, reduced, running }) {
   const gl = useThree((s) => s.gl)
   const scene = useThree((s) => s.scene)
   const invalidate = useThree((s) => s.invalidate)
@@ -66,6 +66,9 @@ function Scene({ progress, copies, reduced }) {
   const ghosts = useMemo(() => Array.from({ length: copies - 1 }, () => ({})), [copies])
 
   useFrame(() => {
+    // Suspende cálculos de frame quando o Canvas estiver fora da viewport
+    if (!running && !reduced) return
+
     const p = reduced ? 0.45 : progress.current
     const open = smooth(clamp01((p - 0.04) / 0.5))
     const drift = (p - 0.5) * 0.75
@@ -120,7 +123,7 @@ export default function StackScene({ progress, running, reduced, mobile }) {
       aria-label="Cascata tridimensional de cartões Nubank"
       role="img"
     >
-      <Scene progress={progress} copies={copies} reduced={reduced} />
+      <Scene progress={progress} copies={copies} reduced={reduced} running={running} />
     </Canvas>
   )
 }

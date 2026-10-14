@@ -29,7 +29,7 @@ function FloorShadow({ refObj }) {
   )
 }
 
-function Scene({ reduced, interactive, onReady }) {
+function Scene({ reduced, interactive, running, onReady }) {
   const gl = useThree((s) => s.gl)
   const scene = useThree((s) => s.scene)
   const viewport = useThree((s) => s.viewport)
@@ -64,6 +64,8 @@ function Scene({ reduced, interactive, onReady }) {
   }, [interactive, reduced])
 
   useFrame((_, rawDt) => {
+    // Suspende cálculos quando fora da viewport
+    if (!running && !reduced) return
     const s = st.current
     const dt = Math.min(rawDt, 0.05)
     const g = card.current?.group
@@ -146,7 +148,7 @@ export default function HeroScene({ reduced, interactive, running, onReady }) {
       aria-label="Modelo tridimensional interativo do cartão de crédito Nubank"
       role="img"
     >
-      <Scene reduced={reduced} interactive={interactive} onReady={onReady} />
+      <Scene reduced={reduced} interactive={interactive} running={running} onReady={onReady} />
     </Canvas>
   )
 }

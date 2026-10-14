@@ -18,7 +18,7 @@ export default function AppSection() {
   return (
     <section className="appsec" id="app" aria-label="Aplicativo Nubank">
       <div className="app-device">
-        {/* Seletor de visualização do app */}
+        {/* Seletor estilizado em pílula para alternar entre experiências */}
         <div className="app-mode-selector" role="tablist" aria-label="Visualização da experiência">
           <button
             type="button"
@@ -27,7 +27,7 @@ export default function AppSection() {
             className={`app-mode-tab ${activeTab === 'dark' ? 'is-active' : ''}`}
             onClick={() => setActiveTab('dark')}
           >
-            Modo Escuro
+            Modo Escuro (App)
           </button>
           <button
             type="button"
@@ -42,19 +42,43 @@ export default function AppSection() {
 
         <div className="app-phone-wrapper">
           <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.96 }}
-              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <Phone
-                screen={activeTab}
-                dark={activeTab === 'dark'}
-                alt={activeTab === 'dark' ? 'Interface real do app Nubank em Dark Mode' : 'Composição celular e cartão Nubank'}
-              />
-            </motion.div>
+            {activeTab === 'dark' ? (
+              <motion.div
+                key="dark"
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <Phone
+                  screen="dark"
+                  alt="Interface real do aplicativo Nubank em Modo Escuro"
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="ecosystem"
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                className="editorial-eco-card"
+              >
+                <div className="editorial-badge">Ecossistema Integrado</div>
+                <div className="editorial-img-frame">
+                  <img
+                    src="/assets/app-light-and-card-ref.jpg"
+                    alt="Ecossistema Nubank com smartphone e cartão de crédito vertical"
+                    className="editorial-eco-img"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <div className="editorial-caption">
+                  <span>Conta Digital e Cartão Físico com Chip EMV</span>
+                </div>
+              </motion.div>
+            )}
           </AnimatePresence>
         </div>
 
@@ -84,7 +108,10 @@ export default function AppSection() {
               key={s.name}
               type="button"
               className="store"
-              onClick={() => demo(`${s.name}`, 'Este é um site demonstrativo. O app não está disponível para download aqui.')}
+              aria-label={`Baixar na loja ${s.name}`}
+              onClick={() =>
+                demo(`${s.name}`, 'Este é um site demonstrativo. O app não está disponível para download aqui.')
+              }
             >
               <small>{s.small}</small>
               <b>{s.name}</b>

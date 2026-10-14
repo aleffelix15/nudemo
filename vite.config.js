@@ -9,9 +9,9 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        // Separa o Three.js em um chunk isolado para carregamento sob demanda
+        // Separa o Three.js em um chunk dedicado 'vendor-three'
         manualChunks: {
-          three: ['three'],
+          'vendor-three': ['three'],
         },
       },
     },

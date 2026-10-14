@@ -4,7 +4,7 @@ import Icon from './Icons'
 
 export default function Benefits() {
   return (
-    <section className="benefits" id="vantagens">
+    <section className="benefits" id="vantagens" aria-label="Vantagens e Benefícios">
       <div className="head dark">
         <h2>
           {BENEFITS.title[0]}
@@ -13,7 +13,8 @@ export default function Benefits() {
         </h2>
         <p>{BENEFITS.lead}</p>
       </div>
-      <ul className="benefit-grid">
+
+      <ul className="benefit-grid" role="list">
         {BENEFITS.items.map((b, i) => (
           <motion.li
             key={b.title}
@@ -29,7 +30,7 @@ export default function Benefits() {
         ))}
       </ul>
 
-      <div className="marquee" role="group" aria-label={MARQUEE.title}>
+      <div className="marquee" role="region" aria-label={MARQUEE.title}>
         <p>{MARQUEE.title}</p>
         <div className="marquee-row" aria-hidden="true">
           <div className="marquee-track">
