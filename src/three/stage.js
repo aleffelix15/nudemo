@@ -1,8 +1,7 @@
 import * as THREE from 'three'
+import { isMobileDevice } from './quality.js'
 
-export const isMobileDevice = () =>
-  typeof window !== 'undefined' &&
-  (window.innerWidth < 768 || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0))
+export { isMobileDevice }
 
 // Cache fraco isolado por WebGLRenderer para evitar conflito entre Hero e Stack (B03)
 const studioEnvMap = new WeakMap()

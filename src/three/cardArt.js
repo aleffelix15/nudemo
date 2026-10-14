@@ -1,5 +1,6 @@
 import * as THREE from 'three'
-import { CARD, isMobileDevice } from './cardGeometry'
+import { CARD } from './cardGeometry'
+import { getQualityTier, isMobileDevice } from './quality.js'
 
 // Resolução de alta fidelidade para texturas PBR (proporção vertical 1 : 1.5858)
 export const TEX_W = 1024
@@ -127,9 +128,11 @@ export function drawNuLogo(ctx, x, y, targetWidth = 145, opacity = 1) {
 
 // Textura da face frontal (fiel à referência física app-light-and-card-ref.jpg)
 export function drawFront(variant = 0, { rounded = false, W, H } = {}) {
-  const isMobile = isMobileDevice()
-  const targetW = W || (isMobile ? 512 : TEX_W)
-  const targetH = H || (isMobile ? 812 : TEX_H)
+  const tier = getQualityTier()
+  const defaultW = tier === 'low' ? 768 : TEX_W
+  const defaultH = tier === 'low' ? 1218 : TEX_H
+  const targetW = W || defaultW
+  const targetH = H || defaultH
   const cacheKey = `${variant}_${rounded}_${targetW}_${targetH}`
   if (canvasCache.front.has(cacheKey)) {
     return canvasCache.front.get(cacheKey)
@@ -211,10 +214,12 @@ export function drawFront(variant = 0, { rounded = false, W, H } = {}) {
 }
 
 // Textura do verso vertical do cartão
-export function drawBack(variant = 0) {
-  const isMobile = isMobileDevice()
-  const targetW = isMobile ? 512 : TEX_W
-  const targetH = isMobile ? 812 : TEX_H
+export function drawBack(variant = 0, { W, H } = {}) {
+  const tier = getQualityTier()
+  const defaultW = tier === 'low' ? 768 : TEX_W
+  const defaultH = tier === 'low' ? 1218 : TEX_H
+  const targetW = W || defaultW
+  const targetH = H || defaultH
   const cacheKey = `${variant}_${targetW}_${targetH}`
   if (canvasCache.back.has(cacheKey)) {
     return canvasCache.back.get(cacheKey)

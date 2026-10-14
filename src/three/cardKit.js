@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { VARIANTS, TEX_W, TEX_H, drawFront, drawBack, drawChip, drawBump, tex } from './cardArt'
-import { CARD, getSlabGeometry, getFaceGeometry, getChipGeometry, isMobileDevice } from './cardGeometry'
+import { CARD, getSlabGeometry, getFaceGeometry, getChipGeometry } from './cardGeometry'
+import { isMobileDevice, onQualityTierChange } from './quality.js'
 
 // Posição 3D calculada do chip EMV sobre a face vertical
 export const CHIP_POS = {
@@ -108,9 +109,66 @@ export function createCardKit(maxAniso = 16) {
     chipGeo,
     chipMat,
     variants,
-    dispose() {},
+    dispose() {
+      slab.dispose()
+      face.dispose()
+      chipGeo.dispose()
+      chipMat.dispose()
+      chipTex.dispose()
+      variants.forEach((v) => {
+        v.front.map?.dispose?.()
+        v.front.bumpMap?.dispose?.()
+        v.front.dispose?.()
+        v.back.map?.dispose?.()
+        v.back.dispose?.()
+        v.edge.dispose?.()
+      })
+      sharedCardKit = null
+    },
   }
 
   sharedCardKit = kit
   return kit
+}
+
+export function updateCardKitTextures(kit = sharedCardKit) {
+  if (!kit) return
+  const isMobile = isMobileDevice()
+  const effectiveAniso = isMobile ? 4 : 16
+
+  kit.variants.forEach((v, i) => {
+    const oldFrontMap = v.front.map
+    const oldBackMap = v.back.map
+    const oldBumpMap = v.front.bumpMap
+
+    const newFront = tex(drawFront(i), { aniso: effectiveAniso })
+    const newBack = tex(drawBack(i), { aniso: effectiveAniso })
+    const newBump = tex(drawBump(v.meta.metal), {
+      srgb: false,
+      aniso: isMobile ? 2 : 4,
+      repeat: v.meta.metal ? [1, 1] : [2, 3],
+    })
+
+    v.front.map = newFront
+    if (v.front.bumpMap) v.front.bumpMap = newBump
+    v.front.needsUpdate = true
+
+    v.back.map = newBack
+    v.back.needsUpdate = true
+
+    v.frontMap = newFront
+
+    // Descarta texturas antigas liberando memória GPU
+    oldFrontMap?.dispose?.()
+    oldBackMap?.dispose?.()
+    oldBumpMap?.dispose?.()
+  })
+}
+
+if (typeof window !== 'undefined') {
+  onQualityTierChange(() => {
+    if (sharedCardKit) {
+      updateCardKitTextures(sharedCardKit)
+    }
+  })
 }
