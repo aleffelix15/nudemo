@@ -1,0 +1,30 @@
+:root {
+  /* Marca */
+  --nu: #820ad1;
+  --nu-hover: #6c07ae;
+  --nu-soft: #a855f7;
+  --nu-deep: #530082;
+  --nu-dark: #2e054e;
+
+  /* Superfícies claras (para seções em modo claro mantendo elegância) */
+  --paper: #f4f4f6;
+  --white: #ffffff;
+  --ink: #070709;
+  --ink-2: #3f3f46;
+  --ink-3: #71717a;
+  --rule: rgba(7, 7, 9, 0.08);
+
+  /* Superfícies escuras (alinhadas a images.jpg) */
+  --night: #070709;
+  --night-2: #121216;
+  --night-3: #18181e;
+  --night-line: rgba(255, 255, 255, 0.08);
+  --on-night: #f4f4f6;
+  --on-night-2: #a1a1aa;
+
+  /* Tipografia e layout */
+  --font: 'Figtree Variable', 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --gutter: clamp(20px, 5vw, 72px);
+  --max: 1200px;
+}
