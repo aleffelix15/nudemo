@@ -47,6 +47,15 @@ svg {
 canvas {
   touch-action: pan-y !important;
 }
+button,
+.btn,
+[role="tab"],
+.app-mode-tab,
+.track-cat-btn,
+.pill-burger,
+.sheet a {
+  touch-action: manipulation;
+}
 button {
   font: inherit;
   color: inherit;

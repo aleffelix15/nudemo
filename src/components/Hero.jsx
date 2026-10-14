@@ -15,7 +15,7 @@ const line = {
 export default function Hero() {
   const demo = useDemo()
   const stage = useRef(null)
-  const isVisible = useCanvasVisibility(stage, '100px')
+  const isVisible = useCanvasVisibility(stage, '250px 0px')
   const mobile = useIsMobile()
   const reduced = useReducedMotionMQ()
   const fonts = useFontsReady()
@@ -96,7 +96,7 @@ export default function Hero() {
             />
           </Suspense>
         ) : null}
-        {(!gl || !ready) && <CardFallback />}
+        <CardFallback />
       </div>
     </section>
   )

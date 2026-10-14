@@ -50,58 +50,45 @@ export default function AppSection() {
         </div>
 
         <div className="app-phone-wrapper">
-          <AnimatePresence mode="wait">
-            {activeTab === 'dark' ? (
-              <motion.div
-                key="dark"
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.96 }}
-                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <Phone
-                  screen="dark"
-                  alt="Interface nativa em alta nitidez do aplicativo Nubank em Modo Escuro"
+          <div
+            className={`app-view-pane ${activeTab === 'dark' ? 'is-active' : ''}`}
+            aria-hidden={activeTab !== 'dark'}
+          >
+            <Phone
+              screen="dark"
+              alt="Interface nativa em alta nitidez do aplicativo Nubank em Modo Escuro"
+            />
+          </div>
+          <div
+            className={`app-view-pane ${activeTab === 'image' ? 'is-active' : ''}`}
+            aria-hidden={activeTab !== 'image'}
+          >
+            <Phone
+              screen="image"
+              alt="Captura de tela real do aplicativo Nubank em Modo Escuro"
+            />
+          </div>
+          <div
+            className={`app-view-pane ${activeTab === 'ecosystem' ? 'is-active' : ''}`}
+            aria-hidden={activeTab !== 'ecosystem'}
+          >
+            <div className="editorial-eco-card">
+              <div className="editorial-badge">Ecossistema Integrado</div>
+              <div className="editorial-img-frame">
+                <img
+                  src="/assets/app-light-and-card-ref.jpg"
+                  alt="Ecossistema Nubank com smartphone e cartão de crédito vertical"
+                  width="447"
+                  height="447"
+                  className="editorial-eco-img"
+                  decoding="async"
                 />
-              </motion.div>
-            ) : activeTab === 'image' ? (
-              <motion.div
-                key="image"
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.96 }}
-                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <Phone
-                  screen="image"
-                  alt="Captura de tela real do aplicativo Nubank em Modo Escuro"
-                />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="ecosystem"
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.96 }}
-                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                className="editorial-eco-card"
-              >
-                <div className="editorial-badge">Ecossistema Integrado</div>
-                <div className="editorial-img-frame">
-                  <img
-                    src="/assets/app-light-and-card-ref.jpg"
-                    alt="Ecossistema Nubank com smartphone e cartão de crédito vertical"
-                    className="editorial-eco-img"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-                <div className="editorial-caption">
-                  <span>Conta Digital e Cartão Físico com Chip EMV</span>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              </div>
+              <div className="editorial-caption">
+                <span>Conta Digital e Cartão Físico com Chip EMV</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {APP.chips.map((c, i) => (

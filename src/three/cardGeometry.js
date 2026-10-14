@@ -28,8 +28,17 @@ export function roundedRect(w, h, r) {
   return s
 }
 
+export const isMobileDevice = () =>
+  typeof window !== 'undefined' &&
+  (window.innerWidth < 768 || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0))
+
+// Cache singleton em nível de módulo para reutilização universal
+let cachedSlab = null
+let cachedFace = null
+let cachedChip = null
+
 // Miolo do cartão: placa vertical extrudada com chanfro microscópico
-export function makeSlabGeometry() {
+export function makeSlabGeometry(isMobile = isMobileDevice()) {
   const { w, h, radius: r, depth, bevel: b } = CARD
   const g = new THREE.ExtrudeGeometry(roundedRect(w, h, r), {
     depth,
@@ -37,19 +46,26 @@ export function makeSlabGeometry() {
     bevelThickness: b,
     bevelSize: b,
     bevelOffset: -b,
-    bevelSegments: 3,
-    curveSegments: 36,
+    bevelSegments: isMobile ? 2 : 3,
+    curveSegments: isMobile ? 12 : 32,
   })
   g.translate(0, 0, -depth / 2)
   g.computeVertexNormals()
   return g
 }
 
+export function getSlabGeometry(isMobile = isMobileDevice()) {
+  if (!cachedSlab) {
+    cachedSlab = makeSlabGeometry(isMobile)
+  }
+  return cachedSlab
+}
+
 // Face de impressão vertical (frente e verso), com UV mapeado 0..1
-export function makeFaceGeometry(inset = CARD.bevel) {
+export function makeFaceGeometry(inset = CARD.bevel, isMobile = isMobileDevice()) {
   const w = CARD.w - inset * 2
   const h = CARD.h - inset * 2
-  const g = new THREE.ShapeGeometry(roundedRect(w, h, CARD.radius - inset), 36)
+  const g = new THREE.ShapeGeometry(roundedRect(w, h, CARD.radius - inset), isMobile ? 12 : 32)
   const pos = g.attributes.position
   const uv = g.attributes.uv
   for (let i = 0; i < pos.count; i++) {
@@ -59,15 +75,22 @@ export function makeFaceGeometry(inset = CARD.bevel) {
   return g
 }
 
+export function getFaceGeometry(inset = CARD.bevel, isMobile = isMobileDevice()) {
+  if (!cachedFace) {
+    cachedFace = makeFaceGeometry(inset, isMobile)
+  }
+  return cachedFace
+}
+
 // Chip EMV metálico com relevo físico 3D real e bordas chanfradas
-export function makeChipGeometry(w = 0.307, h = 0.236, r = 0.038, depth = 0.0018) {
+export function makeChipGeometry(w = 0.307, h = 0.236, r = 0.038, depth = 0.0018, isMobile = isMobileDevice()) {
   const g = new THREE.ExtrudeGeometry(roundedRect(w, h, r), {
     depth,
     bevelEnabled: true,
     bevelThickness: 0.0006,
     bevelSize: 0.0006,
-    bevelSegments: 2,
-    curveSegments: 16,
+    bevelSegments: isMobile ? 1 : 2,
+    curveSegments: isMobile ? 8 : 16,
   })
   g.translate(0, 0, -depth / 2)
   const pos = g.attributes.position
@@ -78,4 +101,11 @@ export function makeChipGeometry(w = 0.307, h = 0.236, r = 0.038, depth = 0.0018
   uv.needsUpdate = true
   g.computeVertexNormals()
   return g
+}
+
+export function getChipGeometry(w = 0.307, h = 0.236, r = 0.038, depth = 0.0018, isMobile = isMobileDevice()) {
+  if (!cachedChip) {
+    cachedChip = makeChipGeometry(w, h, r, depth, isMobile)
+  }
+  return cachedChip
 }

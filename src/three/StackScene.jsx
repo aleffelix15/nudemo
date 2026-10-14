@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import NuCard from './NuCard'
-import { createCardKit } from './cardKit'
+import { getSharedCardKit } from './cardKit'
 import { applyStudioEnvironment } from './stage'
 import { STACK, smooth, clamp01 } from './motion'
 import { CARD_FACE_Z } from './cardGeometry'
@@ -51,8 +51,7 @@ function Scene({ progress, copies, reduced, running, isMobile, isSmallMobile }) 
   const invalidate = useThree((s) => s.invalidate)
   const viewport = useThree((s) => s.viewport)
 
-  const kit = useMemo(() => createCardKit(gl.capabilities.getMaxAnisotropy()), [gl])
-  useEffect(() => () => kit.dispose(), [kit])
+  const kit = useMemo(() => getSharedCardKit(gl.capabilities.getMaxAnisotropy()), [gl])
 
   useEffect(() => {
     const env = applyStudioEnvironment(gl, scene)

@@ -25,8 +25,9 @@ export default function Phone({
             <img
               src="/assets/app-light-and-card-ref.jpg"
               alt={alt}
+              width="447"
+              height="447"
               className="phone-eco-img"
-              loading="lazy"
               decoding="async"
             />
           </div>
@@ -35,8 +36,9 @@ export default function Phone({
             <img
               src="/assets/app-dark-screen.jpg"
               alt={alt}
+              width="335"
+              height="597"
               className="phone-screen-img"
-              loading="lazy"
               decoding="async"
             />
           </div>

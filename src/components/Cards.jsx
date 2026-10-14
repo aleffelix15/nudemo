@@ -58,7 +58,7 @@ export default function Cards() {
   const fonts = useFontsReady()
   const [gl] = useState(() => hasWebGL())
   const stageRef = useRef(null)
-  const isVisible = useCanvasVisibility(stageRef, '120px')
+  const isVisible = useCanvasVisibility(stageRef, '250px 0px')
   const progress = useRef(0.48)
 
   return (

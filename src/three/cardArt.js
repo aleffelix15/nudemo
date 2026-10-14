@@ -1,10 +1,27 @@
 import * as THREE from 'three'
-import { CARD } from './cardGeometry'
+import { CARD, isMobileDevice } from './cardGeometry'
 import { NU_SVG_PATH } from '../components/Icons'
 
 // Resolução de alta fidelidade para texturas PBR (proporção vertical 1 : 1.5858)
 export const TEX_W = 1024
 export const TEX_H = 1624
+
+// Cache global (singleton) de telas e texturas geradas proceduralmente
+const canvasCache = {
+  front: new Map(),
+  back: new Map(),
+  chip: null,
+  bump: new Map(),
+}
+const textureCache = new Map()
+
+let nuPathInstance = null
+function getNuPath() {
+  if (!nuPathInstance && typeof Path2D !== 'undefined') {
+    nuPathInstance = new Path2D(NU_SVG_PATH)
+  }
+  return nuPathInstance
+}
 
 // Cores e acabamento extraídos diretamente de images (1).jpg e images.png
 export const VARIANTS = [
@@ -97,20 +114,27 @@ export function drawMastercard(ctx, x, y, r = 44) {
   ctx.restore()
 }
 
-// Logotipo "nu" vetorial reproduzindo com exatidão a fita contínua
+// Logotipo "nu" vetorial reproduzindo com exatidão a fita contínua 100% síncrono e imediato
 export function drawNuVector(ctx, x, y, targetWidth = 140, color = 'rgba(255,255,255,0.95)') {
   ctx.save()
-  const p = new Path2D(NU_SVG_PATH)
+  const p = getNuPath()
   const scale = targetWidth / 24
   ctx.translate(x, y)
   ctx.scale(scale, scale)
   ctx.fillStyle = color
-  ctx.fill(p)
+  if (p) {
+    ctx.fill(p)
+  }
   ctx.restore()
 }
 
 // Textura da face frontal (fiel à referência física images (1).jpg)
 export function drawFront(variant = 0, { rounded = false, W = TEX_W, H = TEX_H } = {}) {
+  const cacheKey = `${variant}_${rounded}_${W}_${H}`
+  if (canvasCache.front.has(cacheKey)) {
+    return canvasCache.front.get(cacheKey)
+  }
+
   const v = VARIANTS[variant]
   const c = canvas(W, H)
   const ctx = c.getContext('2d')
@@ -193,11 +217,16 @@ export function drawFront(variant = 0, { rounded = false, W = TEX_W, H = TEX_H }
   // 4. Canto Inferior Esquerdo: Logotipo oficial "nu"
   drawNuVector(ctx, 130, 1370, 150, v.ink)
 
+  canvasCache.front.set(cacheKey, c)
   return c
 }
 
 // Textura do verso vertical do cartão
 export function drawBack(variant = 0) {
+  if (canvasCache.back.has(variant)) {
+    return canvasCache.back.get(variant)
+  }
+
   const v = VARIANTS[variant]
   const c = canvas(TEX_W, TEX_H)
   const ctx = c.getContext('2d')
@@ -240,11 +269,16 @@ export function drawBack(variant = 0) {
   // Logotipo no verso
   drawNuVector(ctx, w - 240, h * 0.86, 120, 'rgba(255,255,255,0.7)')
 
+  canvasCache.back.set(variant, c)
   return c
 }
 
 // Chip EMV metálico prateado com cantos arredondados e contatos elétricos em baixo relevo
 export function drawChip() {
+  if (canvasCache.chip) {
+    return canvasCache.chip
+  }
+
   const W = 512
   const H = 392
   const c = canvas(W, H)
@@ -300,10 +334,16 @@ export function drawChip() {
   roundedPath(ctx, W * 0.28, H * 0.18, W * 0.44, H * 0.64, 28)
   ctx.stroke()
 
+  canvasCache.chip = c
   return c
 }
 
 export function drawBump(metal) {
+  const key = !!metal
+  if (canvasCache.bump.has(key)) {
+    return canvasCache.bump.get(key)
+  }
+
   const c = canvas(512, 512)
   const ctx = c.getContext('2d')
   ctx.fillStyle = '#808080'
@@ -318,18 +358,32 @@ export function drawBump(metal) {
     ctx.globalAlpha = 0.4
     ctx.drawImage(noiseTile(512, 1), 0, 0)
   }
+  canvasCache.bump.set(key, c)
   return c
 }
 
 export function tex(canvasEl, { srgb = true, aniso = 16, repeat } = {}) {
+  const isMobile = isMobileDevice()
+  const targetAniso = isMobile ? 4 : Math.min(16, aniso)
+  const repKey = repeat ? `${repeat[0]}_${repeat[1]}` : 'none'
+  if (!canvasEl._texUid) {
+    canvasEl._texUid = 'tex_' + Math.random().toString(36).substring(2, 9)
+  }
+  const cacheKey = `${canvasEl._texUid}_${srgb}_${targetAniso}_${repKey}`
+
+  if (textureCache.has(cacheKey)) {
+    return textureCache.get(cacheKey)
+  }
+
   const t = new THREE.CanvasTexture(canvasEl)
   if (srgb) t.colorSpace = THREE.SRGBColorSpace
-  t.anisotropy = aniso
+  t.anisotropy = targetAniso
   t.generateMipmaps = true
   t.minFilter = THREE.LinearMipmapLinearFilter
   if (repeat) {
     t.wrapS = t.wrapT = THREE.RepeatWrapping
     t.repeat.set(repeat[0], repeat[1])
   }
+  textureCache.set(cacheKey, t)
   return t
 }

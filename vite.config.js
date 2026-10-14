@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   build: {
+    target: 'es2020',
     // Three.js chunk é ~667 kB minificado; elevamos o limite para 1000 kB para evitar warnings desnecessários
     chunkSizeWarningLimit: 1000,
     rollupOptions: {

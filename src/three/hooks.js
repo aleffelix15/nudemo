@@ -19,7 +19,27 @@ export const useIsSmallMobile = () => useMedia('(max-width: 379px)')
 export const useIsCoarsePointer = () => useMedia('(pointer: coarse)')
 export const useReducedMotionMQ = () => useMedia('(prefers-reduced-motion: reduce)')
 
-export function useInView(ref, margin = '100px') {
+// Leitura reativa de scroll com listener passivo sem disparar setState
+let globalScrollY = typeof window !== 'undefined' ? window.scrollY : 0
+if (typeof window !== 'undefined') {
+  window.addEventListener(
+    'scroll',
+    () => {
+      globalScrollY = window.scrollY
+    },
+    { passive: true }
+  )
+}
+export const getScrollY = () => globalScrollY
+
+// Ignora eventos de resize disparados pela barra de endereço retrátil em mobile (< 150px de altura com mesma largura)
+export function isAddressBarResize(prevW, prevH, curW, curH) {
+  const sameWidth = Math.abs(curW - prevW) <= 2
+  const smallHeightDiff = Math.abs(curH - prevH) < 150
+  return sameWidth && smallHeightDiff
+}
+
+export function useInView(ref, margin = '250px 0px') {
   const [v, setV] = useState(false)
   useEffect(() => {
     const el = ref.current
@@ -31,8 +51,8 @@ export function useInView(ref, margin = '100px') {
   return v
 }
 
-// Hook de visibilidade dedicado para controle de ciclo de vida e economia de GPU nas cenas WebGL
-export function useCanvasVisibility(ref, margin = '120px') {
+// Hook de visibilidade dedicado para controle de ciclo de vida e economia de GPU nas cenas WebGL (pré-ativação em 250px)
+export function useCanvasVisibility(ref, margin = '250px 0px') {
   const [visible, setVisible] = useState(true)
   useEffect(() => {
     const el = ref?.current

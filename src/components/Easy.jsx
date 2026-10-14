@@ -9,7 +9,7 @@ const StackScene = lazy(() => import('../three/StackScene'))
 export default function Easy() {
   const ref = useRef(null)
   const progress = useRef(0)
-  const isVisible = useCanvasVisibility(ref, '150px')
+  const isVisible = useCanvasVisibility(ref, '250px 0px')
   const mobile = useIsMobile()
   const reduced = useReducedMotionMQ()
   const fonts = useFontsReady()

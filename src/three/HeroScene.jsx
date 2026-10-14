@@ -2,11 +2,11 @@ import { useEffect, useMemo, useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import NuCard from './NuCard'
-import { createCardKit } from './cardKit'
+import { getSharedCardKit } from './cardKit'
 import { applyStudioEnvironment, radialTexture } from './stage'
 import { HERO, easeInOutCubic } from './motion'
 import { VARIANTS } from './cardArt'
-import { useIsMobile, useIsSmallMobile, useIsCoarsePointer } from './hooks'
+import { useIsMobile, useIsSmallMobile, useIsCoarsePointer, getScrollY } from './hooks'
 
 const FLOOR_Y = -2.15
 
@@ -36,8 +36,7 @@ function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile
   const viewport = useThree((s) => s.viewport)
   const invalidate = useThree((s) => s.invalidate)
 
-  const kit = useMemo(() => createCardKit(gl.capabilities.getMaxAnisotropy()), [gl])
-  useEffect(() => () => kit.dispose(), [kit])
+  const kit = useMemo(() => getSharedCardKit(gl.capabilities.getMaxAnisotropy()), [gl])
 
   useEffect(() => {
     const env = applyStudioEnvironment(gl, scene)
@@ -100,8 +99,8 @@ function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile
     s.px = THREE.MathUtils.damp(s.px, s.tx, 3.5, dt)
     s.py = THREE.MathUtils.damp(s.py, s.ty, 3.5, dt)
 
-    // Amortecimento suave do scroll
-    const targetScroll = typeof window === 'undefined' ? 0 : window.scrollY
+    // Amortecimento suave do scroll sem re-render
+    const targetScroll = getScrollY()
     s.scroll = THREE.MathUtils.damp(s.scroll, targetScroll, 4, dt)
 
     g.rotation.set(

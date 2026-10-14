@@ -30,6 +30,7 @@ export default function CardFallback() {
             width="360"
             height="571"
             className="fallback-card-img"
+            decoding="async"
           />
         ) : (
           <div className="editorial-eco-card">
@@ -37,7 +38,10 @@ export default function CardFallback() {
               <img
                 src="/assets/app-light-and-card-ref.jpg"
                 alt="Cartão e Aplicativo Nubank"
+                width="447"
+                height="447"
                 className="editorial-eco-img"
+                decoding="async"
               />
             </div>
           </div>

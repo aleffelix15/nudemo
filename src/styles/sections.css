@@ -121,7 +121,7 @@ h3 {
   inset: 0;
   display: grid;
   place-items: center;
-  transition: opacity 0.5s;
+  transition: opacity 0.25s ease-out;
 }
 .card-fallback img,
 .fallback-card-img {
@@ -256,6 +256,7 @@ h3 {
   z-index: 1;
   user-select: none;
   box-sizing: border-box;
+  transform: translateZ(0);
 }
 .phone-button {
   position: absolute;
@@ -666,6 +667,8 @@ h3 {
   position: relative;
   width: 292px;
   transform-origin: 50% 60%;
+  transform: translateZ(0);
+  will-change: transform;
 }
 .ghost {
   position: absolute;
@@ -1020,7 +1023,30 @@ h3 {
 }
 .app-phone-wrapper {
   position: relative;
-  width: 292px;
+  width: 100%;
+  max-width: 315px;
+  min-height: 618px;
+  display: flex;
+  justify-content: center;
+}
+.app-view-pane {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: scale(0.97);
+  transition: opacity 0.28s var(--ease), transform 0.28s var(--ease), visibility 0.28s;
+  will-change: opacity, transform;
+}
+.app-view-pane.is-active {
+  position: relative;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: scale(1);
 }
 .chip-note {
   position: absolute;
@@ -1497,6 +1523,10 @@ h3 {
     height: 570px;
     border-radius: 36px;
     padding: 8px;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), inset 0 0 0 1.5px #121216, 0 16px 36px rgba(0, 0, 0, 0.5);
+  }
+  .app-phone-wrapper {
+    min-height: 570px;
   }
   .editorial-eco-card {
     width: min(100%, 280px);
@@ -1521,6 +1551,9 @@ h3 {
     height: 540px;
     padding: 7px;
     border-radius: 32px;
+  }
+  .app-phone-wrapper {
+    min-height: 540px;
   }
   .editorial-eco-card {
     width: min(100%, 268px);
