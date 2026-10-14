@@ -14,7 +14,7 @@ const studioEnvMap = new WeakMap()
  * 3. Softbox violeta traseiro (rim light de perfil).
  */
 export function getStudioEnvironment(gl) {
-  if (studioEnvMap.has(gl)) return studioEnvMap.get(gl)
+  if (studioEnvMap.has(gl)) return studioEnvMap.get(gl).texture
 
   const isMobile = isMobileDevice()
   const pmrem = new THREE.PMREMGenerator(gl)
@@ -49,7 +49,7 @@ export function getStudioEnvironment(gl) {
   // Gera PMREM com resolução otimizada
   const renderTarget = pmrem.fromScene(studioScene, isMobile ? 0.08 : 0.04)
   const texture = renderTarget.texture
-  studioEnvMap.set(gl, texture)
+  studioEnvMap.set(gl, { renderTarget, texture })
 
   // Limpa geometrias e materiais temporários
   keyGeo.dispose()
@@ -65,8 +65,11 @@ export function getStudioEnvironment(gl) {
 
 export function disposeStudioEnvironment(gl) {
   if (gl && studioEnvMap.has(gl)) {
-    const env = studioEnvMap.get(gl)
-    env?.dispose?.()
+    const entry = studioEnvMap.get(gl)
+    if (entry) {
+      entry.renderTarget?.dispose?.()
+      entry.texture?.dispose?.()
+    }
     studioEnvMap.delete(gl)
   }
 }
