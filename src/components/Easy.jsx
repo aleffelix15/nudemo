@@ -1,32 +1,34 @@
 import { lazy, Suspense, useRef } from 'react'
-import { useMotionValueEvent, useScroll } from 'framer-motion'
 import { EASY } from '../content'
 import Icon from './Icons'
-import { hasWebGL, useCanvasVisibility, useIsMobile, useReducedMotionMQ, useFontsReady } from '../three/hooks'
+import CardFallback from './CardFallback'
+import {
+  hasWebGL,
+  useCanvasVisibility,
+  useIsMobile,
+  useReducedMotionMQ,
+  useFontsReady,
+  useSectionScrollProgress,
+  useNearViewport,
+} from '../three/hooks'
 
 const StackScene = lazy(() => import('../three/StackScene'))
 
 export default function Easy() {
   const ref = useRef(null)
-  const progress = useRef(0)
+  const isNear = useNearViewport(ref, '400px')
   const isVisible = useCanvasVisibility(ref, '250px 0px')
   const mobile = useIsMobile()
   const reduced = useReducedMotionMQ()
   const fonts = useFontsReady()
   const gl = hasWebGL()
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] })
-
-  useMotionValueEvent(scrollYProgress, 'change', (v) => {
-    progress.current = v
-  })
-
-  if (reduced) progress.current = 0.5
+  const progress = useSectionScrollProgress(ref)
 
   return (
     <section className="easy" id="facilidades" ref={ref} aria-label="Facilidades do Nubank">
       <div className="easy-stage" aria-hidden="true">
-        {gl && fonts && (
-          <Suspense fallback={null}>
+        {gl && fonts && isNear ? (
+          <Suspense fallback={<CardFallback />}>
             <StackScene
               progress={progress}
               running={isVisible}
@@ -34,6 +36,8 @@ export default function Easy() {
               mobile={mobile}
             />
           </Suspense>
+        ) : (
+          <CardFallback />
         )}
       </div>
       <div className="easy-copy">

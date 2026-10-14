@@ -25,3 +25,7 @@ export const STACK = {
 export const easeInOutCubic = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
 export const clamp01 = (v) => Math.min(1, Math.max(0, v))
 export const smooth = (t) => t * t * (3 - 2 * t)
+
+// Tolerância estrita para parada completa do loop 3D (Render on Demand a 0% GPU)
+export const EPSILON = 0.0008
+export const isConverged = (current, target, eps = EPSILON) => Math.abs(target - current) < eps

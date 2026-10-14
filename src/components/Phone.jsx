@@ -28,7 +28,9 @@ export default function Phone({
               width="447"
               height="447"
               className="phone-eco-img"
+              loading="lazy"
               decoding="async"
+              fetchPriority="low"
             />
           </div>
         ) : screen === 'image' ? (
@@ -39,7 +41,9 @@ export default function Phone({
               width="335"
               height="597"
               className="phone-screen-img"
+              loading="lazy"
               decoding="async"
+              fetchPriority="low"
             />
           </div>
         ) : (

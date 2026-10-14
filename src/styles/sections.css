@@ -1273,6 +1273,33 @@ h3 {
 }
 
 @media (max-width: 820px) {
+  /* Isolamento de layout do compositor para rolagem 60 FPS mobile */
+  .cards,
+  .track,
+  .easy,
+  .steps,
+  .appsec,
+  .benefits,
+  .footer {
+    contain: layout style paint;
+  }
+
+  /* Desativação de filtros caros e reflexos pesados em GPU mobile */
+  .nu-bottom-pill {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: #16161cf5;
+  }
+  .card-fallback-glow {
+    display: none;
+  }
+  .editorial-eco-card {
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5);
+  }
+  .chip-note {
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+  }
+
   body {
     font-size: 16px;
   }

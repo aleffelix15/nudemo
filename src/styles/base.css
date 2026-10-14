@@ -355,6 +355,14 @@ b,
     grid-template-columns: 1fr auto;
     padding: 0 8px 0 18px;
     height: 54px;
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    background: #070709f5;
+  }
+  .sheet {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: #0b0b0ffc;
   }
   .pill-links,
   .pill-text {

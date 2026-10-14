@@ -3,7 +3,15 @@ import { motion } from 'framer-motion'
 import { CARDS } from '../content'
 import { useCardImage } from './CardFallback'
 import { useDemo } from '../lib/demo'
-import { useReducedMotionMQ, useIsCoarsePointer, useIsMobile, useFontsReady, hasWebGL, useCanvasVisibility } from '../three/hooks'
+import {
+  useReducedMotionMQ,
+  useIsCoarsePointer,
+  useIsMobile,
+  useFontsReady,
+  hasWebGL,
+  useCanvasVisibility,
+  useNearViewport,
+} from '../three/hooks'
 
 const StackScene = lazy(() => import('../three/StackScene'))
 
@@ -11,12 +19,22 @@ const StackScene = lazy(() => import('../three/StackScene'))
 function TiltCard({ variant, name }) {
   const src = useCardImage(variant, 520)
   const ref = useRef(null)
+  const rectRef = useRef(null)
   const reduced = useReducedMotionMQ()
   const isCoarse = useIsCoarsePointer()
 
+  const enter = () => {
+    if (reduced || isCoarse || !ref.current) return
+    rectRef.current = ref.current.getBoundingClientRect()
+  }
+
   const move = (e) => {
     if (reduced || isCoarse || !ref.current) return
-    const r = ref.current.getBoundingClientRect()
+    let r = rectRef.current
+    if (!r) {
+      r = ref.current.getBoundingClientRect()
+      rectRef.current = r
+    }
     const x = (e.clientX - r.left) / r.width - 0.5
     const y = (e.clientY - r.top) / r.height - 0.5
     // Rotação sutil limitada a no máximo ±8°
@@ -25,12 +43,19 @@ function TiltCard({ variant, name }) {
   }
 
   const leave = () => {
+    rectRef.current = null
     ref.current?.style.removeProperty('--ry')
     ref.current?.style.removeProperty('--rx')
   }
 
   return (
-    <div className="tilt" style={{ touchAction: 'pan-y' }} onPointerMove={move} onPointerLeave={leave}>
+    <div
+      className="tilt"
+      style={{ touchAction: 'pan-y' }}
+      onPointerEnter={enter}
+      onPointerMove={move}
+      onPointerLeave={leave}
+    >
       <div className="tilt-card" ref={ref}>
         {src ? (
           <img
@@ -58,18 +83,19 @@ export default function Cards() {
   const fonts = useFontsReady()
   const [gl] = useState(() => hasWebGL())
   const stageRef = useRef(null)
+  const isNear = useNearViewport(stageRef, '400px')
   const isVisible = useCanvasVisibility(stageRef, '250px 0px')
   const progress = useRef(0.48)
 
   return (
-    <section className="cards" id="cartoes">
+    <section className="cards" id="cartoes" ref={stageRef}>
       <div className="head">
         <h2>{CARDS.title}</h2>
         <p>{CARDS.lead}</p>
       </div>
 
-      {mobile && gl && fonts && (
-        <div className="cards-mobile-stage" ref={stageRef} aria-hidden="true">
+      {mobile && isNear && gl && fonts && (
+        <div className="cards-mobile-stage" aria-hidden="true">
           <Suspense fallback={null}>
             <StackScene
               progress={progress}

@@ -66,21 +66,35 @@ export function createCardKit(maxAniso = 16) {
         }
 
     const mk = (map) =>
-      new THREE.MeshPhysicalMaterial({
-        map,
-        bumpMap: bump,
-        bumpScale: v.metal ? 0.25 : 0.07,
-        ...matProps,
-      })
+      isMobile
+        ? new THREE.MeshStandardMaterial({
+            map,
+            roughness: 0.28,
+            metalness: 0.18,
+            precision: 'mediump',
+          })
+        : new THREE.MeshPhysicalMaterial({
+            map,
+            bumpMap: bump,
+            bumpScale: v.metal ? 0.25 : 0.07,
+            ...matProps,
+          })
 
-    const edge = new THREE.MeshPhysicalMaterial({
-      color: v.edge,
-      metalness: v.metal ? 0.85 : 0.15,
-      roughness: v.metal ? 0.25 : 0.30,
-      clearcoat: isMobile ? 0.12 : 0.25,
-      envMapIntensity: isMobile ? 0.9 : 1.1,
-      precision,
-    })
+    const edge = isMobile
+      ? new THREE.MeshStandardMaterial({
+          color: v.edge,
+          roughness: 0.28,
+          metalness: 0.18,
+          precision: 'mediump',
+        })
+      : new THREE.MeshPhysicalMaterial({
+          color: v.edge,
+          metalness: v.metal ? 0.85 : 0.15,
+          roughness: v.metal ? 0.25 : 0.30,
+          clearcoat: 0.25,
+          envMapIntensity: 1.1,
+          precision,
+        })
 
     return { front: mk(front), back: mk(back), edge, frontMap: front, meta: v }
   })

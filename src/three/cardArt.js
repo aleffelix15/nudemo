@@ -60,6 +60,12 @@ function canvas(w, h) {
 function noiseTile(size, alpha) {
   const c = canvas(size, size)
   const ctx = c.getContext('2d')
+  if (isMobileDevice()) {
+    // No mobile, evita completamente o loop de 1 milhão de operações de pixel
+    ctx.fillStyle = '#808080'
+    ctx.fillRect(0, 0, size, size)
+    return c
+  }
   const img = ctx.createImageData(size, size)
   for (let i = 0; i < img.data.length; i += 4) {
     const v = 128 + (Math.random() - 0.5) * 255
@@ -129,16 +135,19 @@ export function drawNuVector(ctx, x, y, targetWidth = 140, color = 'rgba(255,255
 }
 
 // Textura da face frontal (fiel à referência física images (1).jpg)
-export function drawFront(variant = 0, { rounded = false, W = TEX_W, H = TEX_H } = {}) {
-  const cacheKey = `${variant}_${rounded}_${W}_${H}`
+export function drawFront(variant = 0, { rounded = false, W, H } = {}) {
+  const isMobile = isMobileDevice()
+  const targetW = W || (isMobile ? 512 : TEX_W)
+  const targetH = H || (isMobile ? 812 : TEX_H)
+  const cacheKey = `${variant}_${rounded}_${targetW}_${targetH}`
   if (canvasCache.front.has(cacheKey)) {
     return canvasCache.front.get(cacheKey)
   }
 
   const v = VARIANTS[variant]
-  const c = canvas(W, H)
+  const c = canvas(targetW, targetH)
   const ctx = c.getContext('2d')
-  const scale = W / TEX_W
+  const scale = targetW / TEX_W
   ctx.scale(scale, scale)
 
   const w = TEX_W
@@ -165,10 +174,10 @@ export function drawFront(variant = 0, { rounded = false, W = TEX_W, H = TEX_H }
   ctx.fillStyle = rg
   ctx.fillRect(0, 0, w, h)
 
-  if (v.metal) {
-    // Efeito de escovado horizontal para Ultravioleta
+  if (v.metal && !isMobile) {
+    // Efeito de escovado horizontal para Ultravioleta apenas no desktop
     ctx.globalAlpha = 0.45
-    for (let i = 0; i < 1100; i++) {
+    for (let i = 0; i < 600; i++) {
       const yLine = Math.random() * h
       ctx.fillStyle = Math.random() > 0.5 ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.15)'
       ctx.fillRect(0, yLine, w, 1 + Math.random() * 1.5)
@@ -223,13 +232,20 @@ export function drawFront(variant = 0, { rounded = false, W = TEX_W, H = TEX_H }
 
 // Textura do verso vertical do cartão
 export function drawBack(variant = 0) {
-  if (canvasCache.back.has(variant)) {
-    return canvasCache.back.get(variant)
+  const isMobile = isMobileDevice()
+  const targetW = isMobile ? 512 : TEX_W
+  const targetH = isMobile ? 812 : TEX_H
+  const cacheKey = `${variant}_${targetW}_${targetH}`
+  if (canvasCache.back.has(cacheKey)) {
+    return canvasCache.back.get(cacheKey)
   }
 
   const v = VARIANTS[variant]
-  const c = canvas(TEX_W, TEX_H)
+  const c = canvas(targetW, targetH)
   const ctx = c.getContext('2d')
+  const scale = targetW / TEX_W
+  ctx.scale(scale, scale)
+
   const w = TEX_W
   const h = TEX_H
 
@@ -269,7 +285,7 @@ export function drawBack(variant = 0) {
   // Logotipo no verso
   drawNuVector(ctx, w - 240, h * 0.86, 120, 'rgba(255,255,255,0.7)')
 
-  canvasCache.back.set(variant, c)
+  canvasCache.back.set(cacheKey, c)
   return c
 }
 
@@ -279,19 +295,25 @@ export function drawChip() {
     return canvasCache.chip
   }
 
-  const W = 512
-  const H = 392
+  const isMobile = isMobileDevice()
+  const W = isMobile ? 256 : 512
+  const H = isMobile ? 196 : 392
   const c = canvas(W, H)
   const ctx = c.getContext('2d')
+  const scale = W / 512
+  ctx.scale(scale, scale)
+
+  const origW = 512
+  const origH = 392
 
   // Gradiente metálico prateado com brilho acetinado
-  const g = ctx.createLinearGradient(0, 0, W, H)
+  const g = ctx.createLinearGradient(0, 0, origW, origH)
   g.addColorStop(0, '#f0f0f4')
   g.addColorStop(0.3, '#dcdce2')
   g.addColorStop(0.7, '#c6c6ce')
   g.addColorStop(1, '#a8a8b2')
   ctx.fillStyle = g
-  ctx.fillRect(0, 0, W, H)
+  ctx.fillRect(0, 0, origW, origH)
 
   // Linhas dos contatos do chip
   ctx.strokeStyle = 'rgba(64, 64, 76, 0.65)'
@@ -300,38 +322,38 @@ export function drawChip() {
 
   ctx.beginPath()
   // Linhas horizontais externas
-  ctx.moveTo(0, H * 0.32)
-  ctx.lineTo(W * 0.28, H * 0.32)
-  ctx.lineTo(W * 0.28, H * 0.18)
+  ctx.moveTo(0, origH * 0.32)
+  ctx.lineTo(origW * 0.28, origH * 0.32)
+  ctx.lineTo(origW * 0.28, origH * 0.18)
 
-  ctx.moveTo(0, H * 0.68)
-  ctx.lineTo(W * 0.28, H * 0.68)
-  ctx.lineTo(W * 0.28, H * 0.82)
+  ctx.moveTo(0, origH * 0.68)
+  ctx.lineTo(origW * 0.28, origH * 0.68)
+  ctx.lineTo(origW * 0.28, origH * 0.82)
 
-  ctx.moveTo(W, H * 0.32)
-  ctx.lineTo(W * 0.72, H * 0.32)
-  ctx.lineTo(W * 0.72, H * 0.18)
+  ctx.moveTo(origW, origH * 0.32)
+  ctx.lineTo(origW * 0.72, origH * 0.32)
+  ctx.lineTo(origW * 0.72, origH * 0.18)
 
-  ctx.moveTo(W, H * 0.68)
-  ctx.lineTo(W * 0.72, H * 0.68)
-  ctx.lineTo(W * 0.72, H * 0.82)
+  ctx.moveTo(origW, origH * 0.68)
+  ctx.lineTo(origW * 0.72, origH * 0.68)
+  ctx.lineTo(origW * 0.72, origH * 0.82)
 
   // Linhas verticais
-  ctx.moveTo(W * 0.28, H * 0.18)
-  ctx.lineTo(W * 0.28, 0)
+  ctx.moveTo(origW * 0.28, origH * 0.18)
+  ctx.lineTo(origW * 0.28, 0)
 
-  ctx.moveTo(W * 0.72, H * 0.18)
-  ctx.lineTo(W * 0.72, 0)
+  ctx.moveTo(origW * 0.72, origH * 0.18)
+  ctx.lineTo(origW * 0.72, 0)
 
-  ctx.moveTo(W * 0.28, H * 0.82)
-  ctx.lineTo(W * 0.28, H)
+  ctx.moveTo(origW * 0.28, origH * 0.82)
+  ctx.lineTo(origW * 0.28, origH)
 
-  ctx.moveTo(W * 0.72, H * 0.82)
-  ctx.lineTo(W * 0.72, H)
+  ctx.moveTo(origW * 0.72, origH * 0.82)
+  ctx.lineTo(origW * 0.72, origH)
   ctx.stroke()
 
   // Ilha central do chip
-  roundedPath(ctx, W * 0.28, H * 0.18, W * 0.44, H * 0.64, 28)
+  roundedPath(ctx, origW * 0.28, origH * 0.18, origW * 0.44, origH * 0.64, 28)
   ctx.stroke()
 
   canvasCache.chip = c
@@ -339,24 +361,28 @@ export function drawChip() {
 }
 
 export function drawBump(metal) {
-  const key = !!metal
+  const isMobile = isMobileDevice()
+  const key = `${!!metal}_${isMobile}`
   if (canvasCache.bump.has(key)) {
     return canvasCache.bump.get(key)
   }
 
-  const c = canvas(512, 512)
+  const size = isMobile ? 64 : 512
+  const c = canvas(size, size)
   const ctx = c.getContext('2d')
   ctx.fillStyle = '#808080'
-  ctx.fillRect(0, 0, 512, 512)
-  if (metal) {
-    for (let i = 0; i < 1400; i++) {
-      const v = 95 + Math.random() * 85
-      ctx.fillStyle = `rgba(${v},${v},${v},0.5)`
-      ctx.fillRect(0, Math.random() * 512, 512, 1)
+  ctx.fillRect(0, 0, size, size)
+  if (!isMobile) {
+    if (metal) {
+      for (let i = 0; i < 1400; i++) {
+        const v = 95 + Math.random() * 85
+        ctx.fillStyle = `rgba(${v},${v},${v},0.5)`
+        ctx.fillRect(0, Math.random() * size, size, 1)
+      }
+    } else {
+      ctx.globalAlpha = 0.4
+      ctx.drawImage(noiseTile(size, 1), 0, 0)
     }
-  } else {
-    ctx.globalAlpha = 0.4
-    ctx.drawImage(noiseTile(512, 1), 0, 0)
   }
   canvasCache.bump.set(key, c)
   return c
@@ -364,7 +390,7 @@ export function drawBump(metal) {
 
 export function tex(canvasEl, { srgb = true, aniso = 16, repeat } = {}) {
   const isMobile = isMobileDevice()
-  const targetAniso = isMobile ? 4 : Math.min(16, aniso)
+  const targetAniso = isMobile ? 2 : Math.min(16, aniso)
   const repKey = repeat ? `${repeat[0]}_${repeat[1]}` : 'none'
   if (!canvasEl._texUid) {
     canvasEl._texUid = 'tex_' + Math.random().toString(36).substring(2, 9)
@@ -378,8 +404,8 @@ export function tex(canvasEl, { srgb = true, aniso = 16, repeat } = {}) {
   const t = new THREE.CanvasTexture(canvasEl)
   if (srgb) t.colorSpace = THREE.SRGBColorSpace
   t.anisotropy = targetAniso
-  t.generateMipmaps = true
-  t.minFilter = THREE.LinearMipmapLinearFilter
+  t.generateMipmaps = !isMobile
+  t.minFilter = isMobile ? THREE.LinearFilter : THREE.LinearMipmapLinearFilter
   if (repeat) {
     t.wrapS = t.wrapT = THREE.RepeatWrapping
     t.repeat.set(repeat[0], repeat[1])

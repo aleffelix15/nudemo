@@ -4,7 +4,7 @@ import * as THREE from 'three'
 import NuCard from './NuCard'
 import { getSharedCardKit } from './cardKit'
 import { applyStudioEnvironment, radialTexture } from './stage'
-import { HERO, easeInOutCubic } from './motion'
+import { HERO, easeInOutCubic, EPSILON } from './motion'
 import { VARIANTS } from './cardArt'
 import { useIsMobile, useIsSmallMobile, useIsCoarsePointer, getScrollY } from './hooks'
 
@@ -51,17 +51,41 @@ function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile
   const card = useRef()
   const rig = useRef()
   const shadow = useRef()
+  const isSleeping = useRef(false)
   const st = useRef({ t: 0, variant: 0, px: 0, py: 0, tx: 0, ty: 0, scroll: 0 })
 
+  const wakeUp = () => {
+    if (isSleeping.current) {
+      isSleeping.current = false
+      invalidate()
+    }
+  }
+
   useEffect(() => {
-    if (!interactive || reduced) return
+    window.addEventListener('scroll', wakeUp, { passive: true })
+    window.addEventListener('resize', wakeUp, { passive: true })
+    if (interactive && !reduced && !isMobile) {
+      window.addEventListener('pointermove', wakeUp, { passive: true })
+    }
+    return () => {
+      window.removeEventListener('scroll', wakeUp)
+      window.removeEventListener('resize', wakeUp)
+      if (interactive && !reduced && !isMobile) {
+        window.removeEventListener('pointermove', wakeUp)
+      }
+    }
+  }, [interactive, reduced, isMobile])
+
+  useEffect(() => {
+    if (!interactive || reduced || isMobile) return
     const move = (e) => {
       st.current.tx = (e.clientX / window.innerWidth) * 2 - 1
       st.current.ty = (e.clientY / window.innerHeight) * 2 - 1
+      wakeUp()
     }
     window.addEventListener('pointermove', move, { passive: true })
     return () => window.removeEventListener('pointermove', move)
-  }, [interactive, reduced])
+  }, [interactive, reduced, isMobile])
 
   useFrame((_, rawDt) => {
     // Suspende cálculos quando fora da viewport
@@ -95,6 +119,10 @@ function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile
       card.current?.setVariant(variant)
     }
 
+    const prevPx = s.px
+    const prevPy = s.py
+    const prevScroll = s.scroll
+
     // Amortecimento suave de ponteiro (THREE.MathUtils.damp, sem jitter)
     s.px = THREE.MathUtils.damp(s.px, s.tx, 3.5, dt)
     s.py = THREE.MathUtils.damp(s.py, s.ty, 3.5, dt)
@@ -103,16 +131,28 @@ function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile
     const targetScroll = getScrollY()
     s.scroll = THREE.MathUtils.damp(s.scroll, targetScroll, 4, dt)
 
-    g.rotation.set(
-      HERO.basePitch + s.py * HERO.pointerPitch,
-      HERO.baseYaw + angle + s.scroll * HERO.scrollYaw + s.px * HERO.pointerYaw,
-      HERO.tilt
-    )
+    const rotX = HERO.basePitch + s.py * HERO.pointerPitch
+    const rotY = HERO.baseYaw + angle + s.scroll * HERO.scrollYaw + s.px * HERO.pointerYaw
+    const rotZ = HERO.tilt
+
+    g.rotation.set(rotX, rotY, rotZ)
 
     if (shadow.current) {
-      const apparent = Math.abs(Math.cos(angle + s.scroll * HERO.scrollYaw + HERO.baseYaw))
+      const apparent = Math.abs(Math.cos(rotY))
       shadow.current.scale.set(0.6 + 0.45 * apparent, 0.85, 1)
       shadow.current.material.opacity = 0.45 + 0.3 * apparent
+    }
+
+    // Verificação de convergência (epsilon check): para o loop quando atinge o repouso
+    const delta =
+      Math.abs(s.px - prevPx) +
+      Math.abs(s.py - prevPy) +
+      Math.abs(s.scroll - prevScroll) * HERO.scrollYaw
+
+    if (delta >= EPSILON || phase > HERO.dwell) {
+      invalidate()
+    } else {
+      isSleeping.current = true
     }
   })
 
@@ -124,10 +164,10 @@ function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile
     <group ref={rig} scale={k} position={[0.02, 0.05, 0]}>
       <NuCard ref={card} kit={kit} variant={0} />
       <FloorShadow refObj={shadow} />
-      {/* Iluminação de estúdio clean */}
+      {/* Iluminação de estúdio: máximo 2 luzes direcionais + 1 ambient no mobile */}
       <ambientLight intensity={0.45} color="#f5f0fa" />
       <directionalLight position={[3, 4.5, 5]} intensity={1.15} color="#ffffff" />
-      <directionalLight position={[-3, 2, 4]} intensity={0.45} color="#eedeff" />
+      {!isMobile && <directionalLight position={[-3, 2, 4]} intensity={0.45} color="#eedeff" />}
       <directionalLight position={[-4, 1.5, -3]} intensity={0.8} color="#b98cff" />
     </group>
   )
@@ -145,15 +185,21 @@ export default function HeroScene({ reduced, interactive, running, onReady }) {
         touchAction: 'pan-y',
         pointerEvents: isCoarse ? 'none' : 'auto',
       }}
-      frameloop={running && !reduced ? 'always' : 'demand'}
-      dpr={isMobile ? [1, 1.5] : [1, 2]}
+      frameloop="demand"
+      dpr={isMobile ? [1, 1.25] : [1, 2]}
       camera={{
         position: [0, 0.2, isSmallMobile ? 11.2 : isMobile ? 10.4 : 9.5],
         fov: 28,
         near: 0.5,
         far: 40,
       }}
-      gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
+      gl={{
+        antialias: !isMobile,
+        alpha: true,
+        powerPreference: 'high-performance',
+        stencil: false,
+        depth: true,
+      }}
       onCreated={({ gl, camera }) => {
         gl.domElement.style.touchAction = 'pan-y'
         if (isCoarse) {

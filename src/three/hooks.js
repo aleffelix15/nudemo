@@ -39,6 +39,81 @@ export function isAddressBarResize(prevW, prevH, curW, curH) {
   return sameWidth && smallHeightDiff
 }
 
+// Hook de cálculo ultra-otimizado de progresso de scroll com ZERO layout thrashing (zero getBoundingClientRect no scroll)
+export function useSectionScrollProgress(targetRef) {
+  const progress = useRef(0)
+  const cachedMetrics = useRef({ top: 0, height: 1, vh: 800, lastW: 0 })
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const measure = () => {
+      const el = targetRef.current
+      if (!el) return
+      const curW = window.innerWidth
+      const curH = window.innerHeight
+      if (
+        cachedMetrics.current.lastW > 0 &&
+        isAddressBarResize(cachedMetrics.current.lastW, cachedMetrics.current.vh, curW, curH)
+      ) {
+        return
+      }
+      const r = el.getBoundingClientRect()
+      cachedMetrics.current = {
+        top: r.top + window.scrollY,
+        height: r.height,
+        vh: curH,
+        lastW: curW,
+      }
+    }
+
+    measure()
+
+    const onScroll = () => {
+      const { top, height, vh } = cachedMetrics.current
+      const y = window.scrollY
+      const total = height + vh
+      const current = y + vh - top
+      progress.current = Math.min(1, Math.max(0, current / total))
+    }
+
+    onScroll()
+
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', measure, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', measure)
+    }
+  }, [targetRef])
+
+  return progress
+}
+
+// Montagem diferida: só instancia WebGL secundário quando o usuário estiver a 400px da seção
+export function useNearViewport(ref, margin = '400px') {
+  const [near, setNear] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setNear(true)
+      return
+    }
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setNear(true)
+          io.disconnect()
+        }
+      },
+      { rootMargin: margin }
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [ref, margin])
+  return near
+}
+
 export function useInView(ref, margin = '250px 0px') {
   const [v, setV] = useState(false)
   useEffect(() => {

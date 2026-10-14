@@ -23,18 +23,27 @@ const NuCard = forwardRef(function NuCard({ kit, variant = 0 }, ref) {
   const v0 = kit.variants[variant]
   return (
     <group ref={group}>
-      <mesh ref={slab} geometry={kit.slab} material={v0.edge} castShadow receiveShadow />
+      <mesh
+        ref={slab}
+        geometry={kit.slab}
+        material={v0.edge}
+        matrixAutoUpdate={false}
+        onUpdate={(self) => self.updateMatrix()}
+      />
       <mesh
         ref={front}
         geometry={kit.face}
         material={v0.front}
         position={[0, 0, CARD_FACE_Z + 0.0003]}
+        matrixAutoUpdate={false}
+        onUpdate={(self) => self.updateMatrix()}
       />
       <mesh
         geometry={kit.chipGeo}
         material={kit.chipMat}
         position={[CHIP_POS.x, CHIP_POS.y, CARD_FACE_Z + 0.0015]}
-        castShadow
+        matrixAutoUpdate={false}
+        onUpdate={(self) => self.updateMatrix()}
       />
       <mesh
         ref={back}
@@ -42,6 +51,8 @@ const NuCard = forwardRef(function NuCard({ kit, variant = 0 }, ref) {
         material={v0.back}
         position={[0, 0, BACK_Z - 0.0003]}
         rotation={[0, Math.PI, 0]}
+        matrixAutoUpdate={false}
+        onUpdate={(self) => self.updateMatrix()}
       />
     </group>
   )

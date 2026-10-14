@@ -81,7 +81,9 @@ export default function AppSection() {
                   width="447"
                   height="447"
                   className="editorial-eco-img"
+                  loading="lazy"
                   decoding="async"
+                  fetchPriority="low"
                 />
               </div>
               <div className="editorial-caption">

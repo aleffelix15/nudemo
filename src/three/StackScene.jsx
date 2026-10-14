@@ -4,7 +4,7 @@ import * as THREE from 'three'
 import NuCard from './NuCard'
 import { getSharedCardKit } from './cardKit'
 import { applyStudioEnvironment } from './stage'
-import { STACK, smooth, clamp01 } from './motion'
+import { STACK, smooth, clamp01, EPSILON } from './motion'
 import { CARD_FACE_Z } from './cardGeometry'
 import { useIsMobile, useIsSmallMobile, useIsCoarsePointer } from './hooks'
 
@@ -64,12 +64,35 @@ function Scene({ progress, copies, reduced, running, isMobile, isSmallMobile }) 
 
   const top = useRef()
   const ghosts = useMemo(() => Array.from({ length: copies - 1 }, () => ({})), [copies])
+  const isSleeping = useRef(false)
+  const smoothedP = useRef(typeof progress?.current === 'number' ? progress.current : 0)
 
-  useFrame(() => {
+  const wakeUp = () => {
+    if (isSleeping.current) {
+      isSleeping.current = false
+      invalidate()
+    }
+  }
+
+  useEffect(() => {
+    window.addEventListener('scroll', wakeUp, { passive: true })
+    window.addEventListener('resize', wakeUp, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', wakeUp)
+      window.removeEventListener('resize', wakeUp)
+    }
+  }, [])
+
+  useFrame((_, rawDt) => {
     // Suspende cálculos de frame quando o Canvas estiver fora da viewport
     if (!running && !reduced) return
 
-    const p = reduced ? 0.45 : progress.current
+    const dt = Math.min(rawDt, 0.05)
+    const targetP = reduced ? 0.45 : (typeof progress?.current === 'number' ? progress.current : 0)
+    const prevP = smoothedP.current
+    smoothedP.current = THREE.MathUtils.damp(smoothedP.current, targetP, 5, dt)
+    const p = smoothedP.current
+
     const open = smooth(clamp01((p - 0.04) / 0.5))
     const drift = (p - 0.5) * 0.75
     const [rx, ry, rz] = STACK.rot
@@ -90,6 +113,13 @@ function Scene({ progress, copies, reduced, running, isMobile, isSmallMobile }) 
       if (gh.mats) gh.mats.f.opacity = gh.mats.e.opacity = a
       gh.group.visible = a > 0.01
     })
+
+    const delta = Math.abs(smoothedP.current - prevP)
+    if (delta >= EPSILON) {
+      invalidate()
+    } else {
+      isSleeping.current = true
+    }
   })
 
   // Escala adaptativa para não cortar em telas móveis
@@ -104,7 +134,7 @@ function Scene({ progress, copies, reduced, running, isMobile, isSmallMobile }) 
       ))}
       <ambientLight intensity={0.4} color="#f6f2fc" />
       <directionalLight position={[3, 5, 5]} intensity={1.1} />
-      <directionalLight position={[-4, 1, -3]} intensity={0.7} color="#b98cff" />
+      {!isMobile && <directionalLight position={[-4, 1, -3]} intensity={0.7} color="#b98cff" />}
     </group>
   )
 }
@@ -123,15 +153,21 @@ export default function StackScene({ progress, running, reduced, mobile }) {
         touchAction: 'pan-y',
         pointerEvents: isCoarse ? 'none' : 'auto',
       }}
-      frameloop={running && !reduced ? 'always' : 'demand'}
-      dpr={isMobile ? [1, 1.5] : [1, 2]}
+      frameloop="demand"
+      dpr={isMobile ? [1, 1.25] : [1, 2]}
       camera={{
         position: [0, 0, isSmallMobile ? 12.2 : isMobile ? 11.4 : 10.5],
         fov: 28,
         near: 0.5,
         far: 50,
       }}
-      gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
+      gl={{
+        antialias: !isMobile,
+        alpha: true,
+        powerPreference: 'high-performance',
+        stencil: false,
+        depth: true,
+      }}
       onCreated={({ gl }) => {
         gl.domElement.style.touchAction = 'pan-y'
         if (isCoarse) {
