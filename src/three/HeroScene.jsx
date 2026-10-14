@@ -3,7 +3,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import NuCard from './NuCard'
 import { getSharedCardKit } from './cardKit'
-import { applyStudioEnvironment, getContactShadowTexture, getAmbientShadowTexture } from './stage'
+import { applyStudioEnvironment, disposeStudioEnvironment, getContactShadowTexture, getAmbientShadowTexture } from './stage'
 import { HERO, easeInOutCubic, EPSILON } from './motion'
 import { VARIANTS } from './cardArt'
 import { useIsMobile, useIsSmallMobile, useIsCoarsePointer, getScrollY } from './hooks'
@@ -45,37 +45,42 @@ function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile
     onReady?.()
     return () => {
       scene.environment = null
+      disposeStudioEnvironment?.(gl)
     }
   }, [gl, scene, invalidate, onReady])
+
+  // Desperta a renderização quando running passa para true
+  useEffect(() => {
+    if (running) {
+      invalidate()
+    }
+  }, [running, invalidate])
 
   const card = useRef()
   const rig = useRef()
   const contactShadow = useRef()
   const ambientShadow = useRef()
   const isSleeping = useRef(false)
-  const st = useRef({ t: 0, variant: 0, px: 0, py: 0, tx: 0, ty: 0, scroll: 0 })
+  const dwellTimer = useRef(null)
+  const st = useRef({ t: 0, variant: 0, px: 0, py: 0, tx: 0, ty: 0, scroll: 0, lastNow: performance.now() })
 
   const wakeUp = () => {
-    if (isSleeping.current) {
-      isSleeping.current = false
-      invalidate()
-    }
+    isSleeping.current = false
+    invalidate()
   }
 
   useEffect(() => {
     window.addEventListener('scroll', wakeUp, { passive: true })
     window.addEventListener('resize', wakeUp, { passive: true })
-    if (interactive && !reduced && !isMobile) {
-      window.addEventListener('pointermove', wakeUp, { passive: true })
-    }
     return () => {
       window.removeEventListener('scroll', wakeUp)
       window.removeEventListener('resize', wakeUp)
-      if (interactive && !reduced && !isMobile) {
-        window.removeEventListener('pointermove', wakeUp)
+      if (dwellTimer.current) {
+        clearTimeout(dwellTimer.current)
+        dwellTimer.current = null
       }
     }
-  }, [interactive, reduced, isMobile])
+  }, [])
 
   useEffect(() => {
     if (!interactive || reduced || isMobile) return
@@ -89,8 +94,16 @@ function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile
   }, [interactive, reduced, isMobile])
 
   useFrame((_, rawDt) => {
-    if (!running && !reduced) return
+    if (!running && !reduced) {
+      isSleeping.current = true
+      return
+    }
+
     const s = st.current
+    const now = performance.now()
+    const realDt = Math.min((now - s.lastNow) / 1000, 0.1)
+    s.lastNow = now
+
     const dt = Math.min(rawDt, 0.05)
     const g = card.current?.group
     if (!g) return
@@ -107,11 +120,28 @@ function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile
     }
 
     const period = HERO.dwell + HERO.spin
-    s.t += dt
+    // O tempo avança com o relógio real para que o repouso termine sozinho
+    s.t += Math.max(dt, realDt)
     const cycle = Math.floor(s.t / period)
     const phase = s.t - cycle * period
     let u = 0
-    if (phase > HERO.dwell) u = (phase - HERO.dwell) / HERO.spin
+    if (phase > HERO.dwell) {
+      u = (phase - HERO.dwell) / HERO.spin
+      if (dwellTimer.current) {
+        clearTimeout(dwellTimer.current)
+        dwellTimer.current = null
+      }
+    } else {
+      // Agenda despertar no término do repouso para iniciar o giro autonomamente
+      if (!dwellTimer.current) {
+        const remainingDwell = Math.max(16, (HERO.dwell - phase) * 1000)
+        dwellTimer.current = setTimeout(() => {
+          dwellTimer.current = null
+          wakeUp()
+        }, remainingDwell)
+      }
+    }
+
     const angle = Math.PI * 2 * easeInOutCubic(u)
     const variant = (cycle + (u >= HERO.swapAt ? 1 : 0)) % VARIANTS.length
 
@@ -150,7 +180,7 @@ function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile
       Math.abs(s.py - prevPy) +
       Math.abs(s.scroll - prevScroll) * HERO.scrollYaw
 
-    if (delta >= EPSILON || phase > HERO.dwell) {
+    if (delta >= EPSILON || phase > HERO.dwell || u > 0) {
       invalidate()
     } else {
       isSleeping.current = true

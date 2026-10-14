@@ -4,8 +4,8 @@ export const isMobileDevice = () =>
   typeof window !== 'undefined' &&
   (window.innerWidth < 768 || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0))
 
-// Cache global singleton para o mapa de estúdio PMREM
-let cachedStudioEnv = null
+// Cache fraco isolado por WebGLRenderer para evitar conflito entre Hero e Stack (B03)
+const studioEnvMap = new WeakMap()
 
 /**
  * Cria um ambiente de estúdio procedural dedicado com 3 softboxes retangulares:
@@ -14,7 +14,7 @@ let cachedStudioEnv = null
  * 3. Softbox violeta traseiro (rim light de perfil).
  */
 export function getStudioEnvironment(gl) {
-  if (cachedStudioEnv) return cachedStudioEnv
+  if (studioEnvMap.has(gl)) return studioEnvMap.get(gl)
 
   const isMobile = isMobileDevice()
   const pmrem = new THREE.PMREMGenerator(gl)
@@ -48,7 +48,8 @@ export function getStudioEnvironment(gl) {
 
   // Gera PMREM com resolução otimizada
   const renderTarget = pmrem.fromScene(studioScene, isMobile ? 0.08 : 0.04)
-  cachedStudioEnv = renderTarget.texture
+  const texture = renderTarget.texture
+  studioEnvMap.set(gl, texture)
 
   // Limpa geometrias e materiais temporários
   keyGeo.dispose()
@@ -59,7 +60,15 @@ export function getStudioEnvironment(gl) {
   rimMat.dispose()
   pmrem.dispose()
 
-  return cachedStudioEnv
+  return texture
+}
+
+export function disposeStudioEnvironment(gl) {
+  if (gl && studioEnvMap.has(gl)) {
+    const env = studioEnvMap.get(gl)
+    env?.dispose?.()
+    studioEnvMap.delete(gl)
+  }
 }
 
 export function applyStudioEnvironment(gl, scene) {

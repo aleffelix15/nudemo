@@ -3,7 +3,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import NuCard from './NuCard'
 import { getSharedCardKit } from './cardKit'
-import { applyStudioEnvironment } from './stage'
+import { applyStudioEnvironment, disposeStudioEnvironment } from './stage'
 import { STACK, smooth, clamp01, EPSILON } from './motion'
 import { CARD_FACE_Z } from './cardGeometry'
 import { useIsMobile, useIsSmallMobile, useIsCoarsePointer } from './hooks'
@@ -64,8 +64,16 @@ function Scene({ progress, copies, reduced, running, isMobile, isSmallMobile }) 
     invalidate()
     return () => {
       scene.environment = null
+      disposeStudioEnvironment?.(gl)
     }
   }, [gl, scene, invalidate])
+
+  // Desperta a renderização quando running passa para true
+  useEffect(() => {
+    if (running) {
+      invalidate()
+    }
+  }, [running, invalidate])
 
   const top = useRef()
   const ghosts = useMemo(() => Array.from({ length: copies - 1 }, () => ({})), [copies])
@@ -73,10 +81,8 @@ function Scene({ progress, copies, reduced, running, isMobile, isSmallMobile }) 
   const smoothedP = useRef(typeof progress?.current === 'number' ? progress.current : 0)
 
   const wakeUp = () => {
-    if (isSleeping.current) {
-      isSleeping.current = false
-      invalidate()
-    }
+    isSleeping.current = false
+    invalidate()
   }
 
   useEffect(() => {
@@ -89,7 +95,10 @@ function Scene({ progress, copies, reduced, running, isMobile, isSmallMobile }) 
   }, [])
 
   useFrame((_, rawDt) => {
-    if (!running && !reduced) return
+    if (!running && !reduced) {
+      isSleeping.current = true
+      return
+    }
 
     const dt = Math.min(rawDt, 0.05)
     const targetP = reduced ? 0.45 : (typeof progress?.current === 'number' ? progress.current : 0)
