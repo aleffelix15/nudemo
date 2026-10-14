@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import NuCard from './NuCard'
@@ -7,6 +7,7 @@ import { applyStudioEnvironment, disposeStudioEnvironment, getContactShadowTextu
 import { HERO, easeInOutCubic, EPSILON } from './motion'
 import { VARIANTS } from './cardArt'
 import { useIsMobile, useIsSmallMobile, useIsCoarsePointer, getScrollY } from './hooks'
+import CardFallback from '../components/CardFallback'
 
 const FLOOR_Y = -2.15
 
@@ -206,49 +207,68 @@ export default function HeroScene({ reduced, interactive, running, onReady }) {
   const isMobile = useIsMobile()
   const isSmallMobile = useIsSmallMobile()
   const isCoarse = useIsCoarsePointer()
+  const [contextLost, setContextLost] = useState(false)
+  const invalidateRef = useRef(null)
 
   return (
-    <Canvas
-      className="hero-canvas"
-      style={{
-        touchAction: 'pan-y',
-        pointerEvents: isCoarse ? 'none' : 'auto',
-      }}
-      frameloop="demand"
-      dpr={isMobile ? [1, 1.25] : [1, 1.75]}
-      camera={{
-        position: [0, 0.2, isSmallMobile ? 11.2 : isMobile ? 10.4 : 9.5],
-        fov: 28,
-        near: 0.5,
-        far: 40,
-      }}
-      gl={{
-        antialias: !isMobile,
-        alpha: true,
-        powerPreference: 'high-performance',
-        stencil: false,
-        depth: true,
-      }}
-      onCreated={({ gl, camera }) => {
-        gl.domElement.style.touchAction = 'pan-y'
-        if (isCoarse) {
-          gl.domElement.style.pointerEvents = 'none'
-        }
-        gl.toneMapping = THREE.ACESFilmicToneMapping
-        gl.toneMappingExposure = 1.42
-        camera.lookAt(0, 0, 0)
-      }}
-      aria-label="Modelo tridimensional interativo do cartão de crédito Nubank"
-      role="img"
-    >
-      <Scene
-        reduced={reduced}
-        interactive={interactive && !isCoarse}
-        running={running}
-        onReady={onReady}
-        isMobile={isMobile}
-        isSmallMobile={isSmallMobile}
-      />
-    </Canvas>
+    <>
+      {contextLost && <CardFallback />}
+      <Canvas
+        className="hero-canvas"
+        style={{
+          touchAction: 'pan-y',
+          pointerEvents: isCoarse ? 'none' : 'auto',
+          display: contextLost ? 'none' : 'block',
+        }}
+        frameloop="demand"
+        dpr={isMobile ? [1, 1.25] : [1, 1.75]}
+        camera={{
+          position: [0, 0.2, isSmallMobile ? 11.2 : isMobile ? 10.4 : 9.5],
+          fov: 28,
+          near: 0.5,
+          far: 40,
+        }}
+        gl={{
+          antialias: !isMobile,
+          alpha: true,
+          powerPreference: 'high-performance',
+          stencil: false,
+          depth: true,
+        }}
+        onCreated={({ gl, camera, invalidate }) => {
+          invalidateRef.current = invalidate
+          const dom = gl.domElement
+          dom.style.touchAction = 'pan-y'
+          if (isCoarse) {
+            dom.style.pointerEvents = 'none'
+          }
+          gl.toneMapping = THREE.ACESFilmicToneMapping
+          gl.toneMappingExposure = 1.42
+          camera.lookAt(0, 0, 0)
+
+          const onLost = (e) => {
+            e.preventDefault()
+            setContextLost(true)
+          }
+          const onRestored = () => {
+            setContextLost(false)
+            invalidateRef.current?.()
+          }
+          dom.addEventListener('webglcontextlost', onLost, false)
+          dom.addEventListener('webglcontextrestored', onRestored, false)
+        }}
+        aria-label="Modelo tridimensional interativo do cartão de crédito Nubank"
+        role="img"
+      >
+        <Scene
+          reduced={reduced}
+          interactive={interactive && !isCoarse}
+          running={running && !contextLost}
+          onReady={onReady}
+          isMobile={isMobile}
+          isSmallMobile={isSmallMobile}
+        />
+      </Canvas>
+    </>
   )
 }

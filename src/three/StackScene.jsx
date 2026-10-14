@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import NuCard from './NuCard'
@@ -7,6 +7,7 @@ import { applyStudioEnvironment, disposeStudioEnvironment } from './stage'
 import { STACK, smooth, clamp01, EPSILON } from './motion'
 import { CARD_FACE_Z } from './cardGeometry'
 import { useIsMobile, useIsSmallMobile, useIsCoarsePointer } from './hooks'
+import CardFallback from '../components/CardFallback'
 
 function Ghost({ kit, refObj, index, total }) {
   // Cópias fantasma com degradê tonal elegante e borda sutilmente mais clara
@@ -157,48 +158,67 @@ export default function StackScene({ progress, running, reduced, mobile }) {
   const isCoarse = useIsCoarsePointer()
   const isMobile = mobile ?? isMobileHook
   const copies = isMobile ? STACK.copiesMobile : STACK.copies
+  const [contextLost, setContextLost] = useState(false)
+  const invalidateRef = useRef(null)
 
   return (
-    <Canvas
-      className="stack-canvas"
-      style={{
-        touchAction: 'pan-y',
-        pointerEvents: isCoarse ? 'none' : 'auto',
-      }}
-      frameloop="demand"
-      dpr={isMobile ? [1, 1.25] : [1, 1.75]}
-      camera={{
-        position: [0, 0, isSmallMobile ? 12.2 : isMobile ? 11.4 : 10.5],
-        fov: 28,
-        near: 0.5,
-        far: 50,
-      }}
-      gl={{
-        antialias: !isMobile,
-        alpha: true,
-        powerPreference: 'high-performance',
-        stencil: false,
-        depth: true,
-      }}
-      onCreated={({ gl }) => {
-        gl.domElement.style.touchAction = 'pan-y'
-        if (isCoarse) {
-          gl.domElement.style.pointerEvents = 'none'
-        }
-        gl.toneMapping = THREE.ACESFilmicToneMapping
-        gl.toneMappingExposure = 1.0
-      }}
-      aria-label="Cascata tridimensional de cartões Nubank"
-      role="img"
-    >
-      <Scene
-        progress={progress}
-        copies={copies}
-        reduced={reduced}
-        running={running}
-        isMobile={isMobile}
-        isSmallMobile={isSmallMobile}
-      />
-    </Canvas>
+    <>
+      {contextLost && <CardFallback />}
+      <Canvas
+        className="stack-canvas"
+        style={{
+          touchAction: 'pan-y',
+          pointerEvents: isCoarse ? 'none' : 'auto',
+          display: contextLost ? 'none' : 'block',
+        }}
+        frameloop="demand"
+        dpr={isMobile ? [1, 1.25] : [1, 1.75]}
+        camera={{
+          position: [0, 0, isSmallMobile ? 12.2 : isMobile ? 11.4 : 10.5],
+          fov: 28,
+          near: 0.5,
+          far: 50,
+        }}
+        gl={{
+          antialias: !isMobile,
+          alpha: true,
+          powerPreference: 'high-performance',
+          stencil: false,
+          depth: true,
+        }}
+        onCreated={({ gl, invalidate }) => {
+          invalidateRef.current = invalidate
+          const dom = gl.domElement
+          dom.style.touchAction = 'pan-y'
+          if (isCoarse) {
+            dom.style.pointerEvents = 'none'
+          }
+          gl.toneMapping = THREE.ACESFilmicToneMapping
+          gl.toneMappingExposure = 1.0
+
+          const onLost = (e) => {
+            e.preventDefault()
+            setContextLost(true)
+          }
+          const onRestored = () => {
+            setContextLost(false)
+            invalidateRef.current?.()
+          }
+          dom.addEventListener('webglcontextlost', onLost, false)
+          dom.addEventListener('webglcontextrestored', onRestored, false)
+        }}
+        aria-label="Cascata tridimensional de cartões Nubank"
+        role="img"
+      >
+        <Scene
+          progress={progress}
+          copies={copies}
+          reduced={reduced}
+          running={running && !contextLost}
+          isMobile={isMobile}
+          isSmallMobile={isSmallMobile}
+        />
+      </Canvas>
+    </>
   )
 }

@@ -4,6 +4,7 @@ import { HERO } from '../content'
 import { useDemo } from '../lib/demo'
 import { hasWebGL, useCanvasVisibility, useIsMobile, useReducedMotionMQ, useFontsReady } from '../three/hooks'
 import CardFallback from './CardFallback'
+import SceneBoundary from './SceneBoundary'
 
 const HeroScene = lazy(() => import('../three/HeroScene'))
 
@@ -87,14 +88,16 @@ export default function Hero() {
 
       <div className={`hero-stage ${ready ? 'is-ready' : ''}`} ref={stage}>
         {gl && fonts ? (
-          <Suspense fallback={null}>
-            <HeroScene
-              reduced={reduced}
-              interactive={!mobile}
-              running={isVisible}
-              onReady={() => setReady(true)}
-            />
-          </Suspense>
+          <SceneBoundary fallback={<CardFallback />}>
+            <Suspense fallback={null}>
+              <HeroScene
+                reduced={reduced}
+                interactive={!mobile}
+                running={isVisible}
+                onReady={() => setReady(true)}
+              />
+            </Suspense>
+          </SceneBoundary>
         ) : null}
         <CardFallback />
       </div>

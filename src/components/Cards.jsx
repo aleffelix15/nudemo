@@ -1,7 +1,8 @@
 import { lazy, Suspense, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { CARDS } from '../content'
-import { useCardImage } from './CardFallback'
+import CardFallback, { useCardImage } from './CardFallback'
+import SceneBoundary from './SceneBoundary'
 import { useDemo } from '../lib/demo'
 import {
   useReducedMotionMQ,
@@ -96,14 +97,16 @@ export default function Cards() {
 
       {mobile && isNear && gl && fonts && (
         <div className="cards-mobile-stage" aria-hidden="true">
-          <Suspense fallback={null}>
-            <StackScene
-              progress={progress}
-              running={isVisible}
-              reduced={reduced}
-              mobile={true}
-            />
-          </Suspense>
+          <SceneBoundary fallback={<CardFallback />}>
+            <Suspense fallback={null}>
+              <StackScene
+                progress={progress}
+                running={isVisible}
+                reduced={reduced}
+                mobile={true}
+              />
+            </Suspense>
+          </SceneBoundary>
         </div>
       )}
 

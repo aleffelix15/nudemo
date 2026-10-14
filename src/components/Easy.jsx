@@ -2,6 +2,7 @@ import { lazy, Suspense, useRef } from 'react'
 import { EASY } from '../content'
 import Icon from './Icons'
 import CardFallback from './CardFallback'
+import SceneBoundary from './SceneBoundary'
 import {
   hasWebGL,
   useCanvasVisibility,
@@ -28,14 +29,16 @@ export default function Easy() {
     <section className="easy" id="facilidades" ref={ref} aria-label="Facilidades do Nubank">
       <div className="easy-stage" aria-hidden="true">
         {gl && fonts && isNear ? (
-          <Suspense fallback={<CardFallback />}>
-            <StackScene
-              progress={progress}
-              running={isVisible}
-              reduced={reduced}
-              mobile={mobile}
-            />
-          </Suspense>
+          <SceneBoundary fallback={<CardFallback />}>
+            <Suspense fallback={<CardFallback />}>
+              <StackScene
+                progress={progress}
+                running={isVisible}
+                reduced={reduced}
+                mobile={mobile}
+              />
+            </Suspense>
+          </SceneBoundary>
         ) : (
           <CardFallback />
         )}
