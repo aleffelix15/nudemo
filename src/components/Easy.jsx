@@ -1,4 +1,4 @@
-import { lazy, Suspense, useRef } from 'react'
+import { lazy, Suspense, useRef, useState } from 'react'
 import { EASY } from '../content'
 import Icon from './Icons'
 import CardFallback from './CardFallback'
@@ -22,7 +22,7 @@ export default function Easy() {
   const mobile = useIsMobile()
   const reduced = useReducedMotionMQ()
   const fonts = useFontsReady()
-  const gl = hasWebGL()
+  const [gl] = useState(() => hasWebGL())
   const progress = useSectionScrollProgress(ref)
 
   return (

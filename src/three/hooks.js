@@ -142,13 +142,21 @@ export function useCanvasVisibility(ref, margin = '250px 0px') {
   return visible
 }
 
+let cachedHasWebGL = null
+
 export function hasWebGL() {
+  if (cachedHasWebGL !== null) return cachedHasWebGL
   try {
     const c = document.createElement('canvas')
-    return !!(c.getContext('webgl2') || c.getContext('webgl'))
+    const gl = c.getContext('webgl2') || c.getContext('webgl')
+    cachedHasWebGL = !!gl
+    if (gl) {
+      gl.getExtension('WEBGL_lose_context')?.loseContext()
+    }
   } catch {
-    return false
+    cachedHasWebGL = false
   }
+  return cachedHasWebGL
 }
 
 // Fontes carregadas antes de desenhar texturas com texto
