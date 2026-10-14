@@ -53,7 +53,14 @@ export default function Header() {
           <button type="button" className="btn btn-dark btn-sm" onClick={() => demo()}>
             Abrir conta
           </button>
-          <button type="button" className="pill-menu" aria-expanded={open} aria-controls="menu-mobile" aria-label={open ? 'Fechar menu' : 'Abrir menu'} onClick={() => setOpen((o) => !o)}>
+          <button
+            type="button"
+            className="pill-menu"
+            aria-expanded={open}
+            aria-controls="menu-mobile"
+            aria-label={open ? 'Fechar menu de navegação' : 'Abrir menu de navegação'}
+            onClick={() => setOpen((o) => !o)}
+          >
             <Icon name={open ? 'close' : 'menu'} />
           </button>
         </div>
@@ -62,7 +69,18 @@ export default function Header() {
       {open && (
         <div className="sheet" id="menu-mobile">
           {NAV.map((n) => (
-            <a key={n.id} href={`#${n.id}`} onClick={() => setOpen(false)}>
+            <a
+              key={n.id}
+              href={`#${n.id}`}
+              onClick={(e) => {
+                e.preventDefault()
+                setOpen(false)
+                const el = document.getElementById(n.id)
+                if (el) {
+                  el.scrollIntoView({ behavior: 'smooth' })
+                }
+              }}
+            >
               {n.label}
             </a>
           ))}
@@ -71,7 +89,7 @@ export default function Header() {
             className="btn btn-primary"
             onClick={() => {
               setOpen(false)
-              demo()
+              demo('Abrir conta', 'Demonstração de abertura de conta digital.')
             }}
           >
             Abrir conta

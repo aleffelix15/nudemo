@@ -6,6 +6,7 @@ import { createCardKit } from './cardKit'
 import { applyStudioEnvironment, radialTexture } from './stage'
 import { HERO, easeInOutCubic } from './motion'
 import { VARIANTS } from './cardArt'
+import { useIsMobile, useIsSmallMobile, useIsCoarsePointer } from './hooks'
 
 const FLOOR_Y = -2.15
 
@@ -29,7 +30,7 @@ function FloorShadow({ refObj }) {
   )
 }
 
-function Scene({ reduced, interactive, running, onReady }) {
+function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile }) {
   const gl = useThree((s) => s.gl)
   const scene = useThree((s) => s.scene)
   const viewport = useThree((s) => s.viewport)
@@ -116,8 +117,9 @@ function Scene({ reduced, interactive, running, onReady }) {
     }
   })
 
-  // Escala adaptativa para não cortar em dispositivos móveis
-  const k = THREE.MathUtils.clamp(viewport.width / 5.2, 0.54, 1.05)
+  // Escala adaptativa para não cortar em telas estreitas (320px - 480px)
+  const baseScale = isSmallMobile ? 0.74 : isMobile ? 0.84 : 1
+  const k = THREE.MathUtils.clamp((viewport.width / 5.2) * baseScale, 0.44, 1.05)
 
   return (
     <group ref={rig} scale={k} position={[0.02, 0.05, 0]}>
@@ -133,14 +135,31 @@ function Scene({ reduced, interactive, running, onReady }) {
 }
 
 export default function HeroScene({ reduced, interactive, running, onReady }) {
+  const isMobile = useIsMobile()
+  const isSmallMobile = useIsSmallMobile()
+  const isCoarse = useIsCoarsePointer()
+
   return (
     <Canvas
       className="hero-canvas"
+      style={{
+        touchAction: 'pan-y',
+        pointerEvents: isCoarse ? 'none' : 'auto',
+      }}
       frameloop={running && !reduced ? 'always' : 'demand'}
-      dpr={[1, 2]}
-      camera={{ position: [0, 0.2, 9.5], fov: 28, near: 0.5, far: 40 }}
+      dpr={isMobile ? [1, 1.5] : [1, 2]}
+      camera={{
+        position: [0, 0.2, isSmallMobile ? 11.2 : isMobile ? 10.4 : 9.5],
+        fov: 28,
+        near: 0.5,
+        far: 40,
+      }}
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       onCreated={({ gl, camera }) => {
+        gl.domElement.style.touchAction = 'pan-y'
+        if (isCoarse) {
+          gl.domElement.style.pointerEvents = 'none'
+        }
         gl.toneMapping = THREE.ACESFilmicToneMapping
         gl.toneMappingExposure = 1.05
         camera.lookAt(0, 0, 0)
@@ -148,7 +167,14 @@ export default function HeroScene({ reduced, interactive, running, onReady }) {
       aria-label="Modelo tridimensional interativo do cartão de crédito Nubank"
       role="img"
     >
-      <Scene reduced={reduced} interactive={interactive} running={running} onReady={onReady} />
+      <Scene
+        reduced={reduced}
+        interactive={interactive && !isCoarse}
+        running={running}
+        onReady={onReady}
+        isMobile={isMobile}
+        isSmallMobile={isSmallMobile}
+      />
     </Canvas>
   )
 }

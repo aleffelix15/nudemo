@@ -6,6 +6,7 @@ import { createCardKit } from './cardKit'
 import { applyStudioEnvironment } from './stage'
 import { STACK, smooth, clamp01 } from './motion'
 import { CARD_FACE_Z } from './cardGeometry'
+import { useIsMobile, useIsSmallMobile, useIsCoarsePointer } from './hooks'
 
 function Ghost({ kit, refObj }) {
   // Cópias fantasma simplificadas para performance e estética clean
@@ -44,7 +45,7 @@ function Ghost({ kit, refObj }) {
   )
 }
 
-function Scene({ progress, copies, reduced, running }) {
+function Scene({ progress, copies, reduced, running, isMobile, isSmallMobile }) {
   const gl = useThree((s) => s.gl)
   const scene = useThree((s) => s.scene)
   const invalidate = useThree((s) => s.invalidate)
@@ -92,10 +93,12 @@ function Scene({ progress, copies, reduced, running }) {
     })
   })
 
-  const k = THREE.MathUtils.clamp(viewport.width / 6.8, 0.58, 1.05)
+  // Escala adaptativa para não cortar em telas móveis
+  const baseScale = isSmallMobile ? 0.74 : isMobile ? 0.84 : 1
+  const k = THREE.MathUtils.clamp((viewport.width / 6.8) * baseScale, 0.44, 1.05)
 
   return (
-    <group scale={k} position={[-0.4, 0.45, 0]}>
+    <group scale={k} position={isMobile ? [0, 0.15, 0] : [-0.4, 0.45, 0]}>
       <NuCard ref={top} kit={kit} variant={0} />
       {ghosts.map((gh, i) => (
         <Ghost key={i} kit={kit} refObj={gh} />
@@ -108,22 +111,47 @@ function Scene({ progress, copies, reduced, running }) {
 }
 
 export default function StackScene({ progress, running, reduced, mobile }) {
-  const copies = mobile ? STACK.copiesMobile : STACK.copies
+  const isMobileHook = useIsMobile()
+  const isSmallMobile = useIsSmallMobile()
+  const isCoarse = useIsCoarsePointer()
+  const isMobile = mobile ?? isMobileHook
+  const copies = isMobile ? STACK.copiesMobile : STACK.copies
+
   return (
     <Canvas
       className="stack-canvas"
+      style={{
+        touchAction: 'pan-y',
+        pointerEvents: isCoarse ? 'none' : 'auto',
+      }}
       frameloop={running && !reduced ? 'always' : 'demand'}
-      dpr={[1, 2]}
-      camera={{ position: [0, 0, 10.5], fov: 28, near: 0.5, far: 50 }}
+      dpr={isMobile ? [1, 1.5] : [1, 2]}
+      camera={{
+        position: [0, 0, isSmallMobile ? 12.2 : isMobile ? 11.4 : 10.5],
+        fov: 28,
+        near: 0.5,
+        far: 50,
+      }}
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       onCreated={({ gl }) => {
+        gl.domElement.style.touchAction = 'pan-y'
+        if (isCoarse) {
+          gl.domElement.style.pointerEvents = 'none'
+        }
         gl.toneMapping = THREE.ACESFilmicToneMapping
         gl.toneMappingExposure = 1.05
       }}
       aria-label="Cascata tridimensional de cartões Nubank"
       role="img"
     >
-      <Scene progress={progress} copies={copies} reduced={reduced} running={running} />
+      <Scene
+        progress={progress}
+        copies={copies}
+        reduced={reduced}
+        running={running}
+        isMobile={isMobile}
+        isSmallMobile={isSmallMobile}
+      />
     </Canvas>
   )
 }

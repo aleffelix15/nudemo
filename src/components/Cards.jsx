@@ -3,16 +3,17 @@ import { motion } from 'framer-motion'
 import { CARDS } from '../content'
 import { useCardImage } from './CardFallback'
 import { useDemo } from '../lib/demo'
-import { useReducedMotionMQ } from '../three/hooks'
+import { useReducedMotionMQ, useIsCoarsePointer } from '../three/hooks'
 
 // Cartão com perspectiva CSS vertical que responde suavemente ao ponteiro
 function TiltCard({ variant, name }) {
   const src = useCardImage(variant, 520)
   const ref = useRef(null)
   const reduced = useReducedMotionMQ()
+  const isCoarse = useIsCoarsePointer()
 
   const move = (e) => {
-    if (reduced || !ref.current) return
+    if (reduced || isCoarse || !ref.current) return
     const r = ref.current.getBoundingClientRect()
     const x = (e.clientX - r.left) / r.width - 0.5
     const y = (e.clientY - r.top) / r.height - 0.5
@@ -27,7 +28,7 @@ function TiltCard({ variant, name }) {
   }
 
   return (
-    <div className="tilt" onPointerMove={move} onPointerLeave={leave}>
+    <div className="tilt" style={{ touchAction: 'pan-y' }} onPointerMove={move} onPointerLeave={leave}>
       <div className="tilt-card" ref={ref}>
         {src ? (
           <img

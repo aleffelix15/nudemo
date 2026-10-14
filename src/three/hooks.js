@@ -14,7 +14,9 @@ export function useMedia(query, initial = false) {
   return m
 }
 
-export const useIsMobile = () => useMedia('(max-width: 820px)')
+export const useIsMobile = () => useMedia('(max-width: 767px)')
+export const useIsSmallMobile = () => useMedia('(max-width: 379px)')
+export const useIsCoarsePointer = () => useMedia('(pointer: coarse)')
 export const useReducedMotionMQ = () => useMedia('(prefers-reduced-motion: reduce)')
 
 export function useInView(ref, margin = '100px') {

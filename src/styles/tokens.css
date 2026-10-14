@@ -22,9 +22,14 @@
   --on-night: #f4f4f6;
   --on-night-2: #a1a1aa;
 
-  /* Tipografia e layout */
+  /* Tipografia e layout fluidos para perfeita adaptação mobile */
   --font: 'Figtree Variable', 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --gutter: clamp(20px, 5vw, 72px);
+  --gutter: clamp(1rem, 5vw, 3rem);
   --max: 1200px;
+
+  /* Escalas tipográficas fluidas (evitam palavras órfãs ou estouro em < 480px) */
+  --font-title-hero: clamp(2.1rem, 7.5vw, 5.6rem);
+  --font-title-section: clamp(1.85rem, 5.2vw, 3.9rem);
+  --font-lead: clamp(1rem, 3.4vw, 1.2rem);
 }
