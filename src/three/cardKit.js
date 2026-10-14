@@ -37,9 +37,10 @@ export function createCardKit(maxAniso = 16) {
     metalness: 0.88,
     roughness: 0.22,
     color: '#ffffff', // Multiplicador neutro para preservar o ouro champagne autêntico
-    envMapIntensity: isMobile ? 1.0 : 1.35,
     precision,
   })
+  chipMat.userData.baseEnv = 1.3
+  chipMat.envMapIntensity = chipMat.userData.baseEnv * (isMobile ? 0.8 : 1.05)
 
   const variants = VARIANTS.map((v, i) => {
     const bump = tex(drawBump(v.metal), { srgb: false, aniso: isMobile ? 2 : 4, repeat: v.metal ? [1, 1] : [2, 3] })
@@ -62,20 +63,22 @@ export function createCardKit(maxAniso = 16) {
           roughness: v.metal ? 0.24 : 0.28,
           clearcoat: v.metal ? 0.15 : 0.35,
           clearcoatRoughness: 0.22,
-          envMapIntensity: v.metal ? 1.4 : 1.15,
           anisotropy: v.metal ? 0.85 : 0, // Reflexo anisotrópico escovado horizontal para Ultravioleta
           anisotropyRotation: 0,
           precision,
         })
+    frontMat.userData.baseEnv = v.metal ? 1.35 : 1.15
+    frontMat.envMapIntensity = frontMat.userData.baseEnv * (isMobile ? 0.8 : 1.05)
 
     // Verso usa MeshStandardMaterial (economia de GPU, clearcoat desnecessário no verso)
     const backMat = new THREE.MeshStandardMaterial({
       map: back,
       roughness: 0.34,
       metalness: v.metal ? 0.75 : 0.05,
-      envMapIntensity: isMobile ? 0.8 : 1.0,
       precision,
     })
+    backMat.userData.baseEnv = v.metal ? 1.0 : 0.9
+    backMat.envMapIntensity = backMat.userData.baseEnv * (isMobile ? 0.8 : 1.05)
 
     // Borda chanfrada ISO que reflete o rim light de estúdio
     const edge = isMobile
@@ -91,9 +94,10 @@ export function createCardKit(maxAniso = 16) {
           roughness: 0.26,
           clearcoat: 0.30,
           clearcoatRoughness: 0.20,
-          envMapIntensity: 1.25,
           precision,
         })
+    edge.userData.baseEnv = v.metal ? 1.25 : 1.0
+    edge.envMapIntensity = edge.userData.baseEnv * (isMobile ? 0.8 : 1.05)
 
     return { front: frontMat, back: backMat, edge, frontMap: front, meta: v }
   })

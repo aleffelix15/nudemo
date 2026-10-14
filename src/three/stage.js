@@ -78,7 +78,6 @@ export function applyStudioEnvironment(gl, scene) {
 
   const env = getStudioEnvironment(gl)
   scene.environment = env
-  scene.environmentIntensity = isMobileDevice() ? 0.8 : 1.05
   return env
 }
 
