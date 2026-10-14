@@ -20,6 +20,30 @@ body {
   text-rendering: optimizeLegibility;
   overflow-x: clip;
 }
+
+/* Margem de ancoragem universal para evitar sobreposição do cabeçalho fixo */
+section[id],
+.hero,
+.cards,
+.track,
+.easy,
+.steps,
+.appsec,
+.benefits {
+  scroll-margin-top: 104px;
+}
+@media (max-width: 820px) {
+  section[id],
+  .hero,
+  .cards,
+  .track,
+  .easy,
+  .steps,
+  .appsec,
+  .benefits {
+    scroll-margin-top: 84px;
+  }
+}
 h1,
 h2,
 h3,

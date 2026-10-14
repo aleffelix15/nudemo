@@ -8,20 +8,22 @@ import { useReducedMotionMQ, useIsMobile } from '../three/hooks'
 const GHOSTS = 7
 const CATEGORIES = ['Tudo no app', 'Saldo & Pix', 'Cartão & Limite', 'Empréstimos']
 
-// Camadas atrás do celular: abrem conforme a seção cruza a tela (efeito de eco da referência)
+// Camadas atrás do celular: abrem conforme a seção cruza a tela
 function Trail({ progress, reduced, mobile }) {
   const spread = useTransform(progress, [0.05, 0.55], [0.15, 1])
+  const count = mobile ? 5 : GHOSTS
   return (
     <>
-      {Array.from({ length: GHOSTS }, (_, i) => (
+      {Array.from({ length: count }, (_, i) => (
         <Ghost key={i} i={i + 1} spread={spread} reduced={reduced} mobile={mobile} />
       ))}
     </>
   )
 }
+
 function Ghost({ i, spread, reduced, mobile }) {
-  const factor = mobile ? 8 : 15
-  const yFactor = mobile ? 7 : 11
+  const factor = mobile ? 5 : 15
+  const yFactor = mobile ? 5 : 11
   const x = useTransform(spread, (s) => -i * factor * (reduced ? 1 : s))
   const y = useTransform(spread, (s) => i * yFactor * (reduced ? 1 : s))
   return <motion.span className="ghost" style={{ x, y, opacity: 0.42 - i * 0.05 }} aria-hidden="true" />
@@ -34,25 +36,39 @@ export default function Track() {
   const mobile = useIsMobile()
   const [activeCat, setActiveCat] = useState(0)
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] })
-  const rotate = useTransform(scrollYProgress, [0, 1], [mobile ? 3 : 6, mobile ? -4 : -8])
-  const lift = useTransform(scrollYProgress, [0, 1], [mobile ? 15 : 30, mobile ? -15 : -30])
+  const rotate = useTransform(scrollYProgress, [0, 1], [mobile ? 2 : 6, mobile ? -3 : -8])
+  const lift = useTransform(scrollYProgress, [0, 1], [mobile ? 10 : 30, mobile ? -10 : -30])
 
   return (
-    <section className="track" id="conta" ref={ref}>
-      <div className="track-device">
-        <motion.div className="track-phone" style={reduced ? { rotate: -2 } : { rotate, y: lift }}>
-          <Trail progress={scrollYProgress} reduced={reduced} mobile={mobile} />
-          <Phone screen="dark" dark alt="Tela inicial do aplicativo Nubank em Modo Escuro" />
-        </motion.div>
-      </div>
-      <div className="track-copy">
+    <section className="track" id="conta" ref={ref} aria-label="Acompanhe sua conta Nubank">
+      {/* Cabeçalho da seção: renderizado no topo em mobile e alinhado à direita no desktop */}
+      <div className="track-head">
         <h2>
           {TRACK.title[0]}
           <br />
           <span className="accent">{TRACK.title[1]}</span>
         </h2>
         <p className="lead">{TRACK.lead}</p>
+      </div>
 
+      {/* Dispositivo com rastro interativo perfeitamente enquadrado */}
+      <div className="track-device">
+        <motion.div className="track-phone" style={reduced ? { rotate: -2 } : { rotate, y: lift }}>
+          <Trail progress={scrollYProgress} reduced={reduced} mobile={mobile} />
+          <Phone
+            activeTab={activeCat === 2 ? 'cartao' : activeCat === 3 ? 'caixinhas' : 'conta'}
+            onTabChange={(tab) => {
+              if (tab === 'cartao') setActiveCat(2)
+              else if (tab === 'caixinhas') setActiveCat(3)
+              else setActiveCat(0)
+            }}
+            alt="Tela inicial do aplicativo Nubank em Modo Escuro"
+          />
+        </motion.div>
+      </div>
+
+      {/* Bloco de estatísticas, categorias e benefícios */}
+      <div className="track-body">
         {/* Barra de progresso e estatísticas em tempo real com números tabulares */}
         <div className="track-stat-card" role="region" aria-label="Controle financeiro em tempo real">
           <div className="track-stat-row">
@@ -96,14 +112,15 @@ export default function Track() {
           ))}
         </div>
 
-        <ul className="ticks">
+        <ul className="ticks" role="list">
           {TRACK.items.map((t) => (
             <li key={t}>{t}</li>
           ))}
         </ul>
+
         <button
           type="button"
-          className="btn btn-primary"
+          className="btn btn-primary track-cta"
           onClick={() => demo('Abrir conta', 'Demonstração de abertura de conta digital.')}
         >
           {TRACK.action}
