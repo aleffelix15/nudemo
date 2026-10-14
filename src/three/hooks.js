@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 
 export function useMedia(query, initial = false) {
   const [m, setM] = useState(() =>
@@ -32,11 +32,9 @@ if (typeof window !== 'undefined') {
 }
 export const getScrollY = () => globalScrollY
 
-// Ignora eventos de resize disparados pela barra de endereço retrátil em mobile (< 150px de altura com mesma largura)
+// Ignora eventos de resize quando window.innerWidth não mudou (barra de endereço mobile recolhendo)
 export function isAddressBarResize(prevW, prevH, curW, curH) {
-  const sameWidth = Math.abs(curW - prevW) <= 2
-  const smallHeightDiff = Math.abs(curH - prevH) < 150
-  return sameWidth && smallHeightDiff
+  return Math.abs(curW - prevW) <= 1
 }
 
 // Hook de cálculo ultra-otimizado de progresso de scroll com ZERO layout thrashing (zero getBoundingClientRect no scroll)

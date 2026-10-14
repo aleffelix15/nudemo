@@ -83,7 +83,7 @@ export default function Cards() {
   const fonts = useFontsReady()
   const [gl] = useState(() => hasWebGL())
   const stageRef = useRef(null)
-  const isNear = useNearViewport(stageRef, '400px')
+  const isNear = useNearViewport(stageRef, '350px')
   const isVisible = useCanvasVisibility(stageRef, '250px 0px')
   const progress = useRef(0.48)
 

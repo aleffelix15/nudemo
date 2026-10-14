@@ -16,7 +16,7 @@ const StackScene = lazy(() => import('../three/StackScene'))
 
 export default function Easy() {
   const ref = useRef(null)
-  const isNear = useNearViewport(ref, '400px')
+  const isNear = useNearViewport(ref, '350px')
   const isVisible = useCanvasVisibility(ref, '250px 0px')
   const mobile = useIsMobile()
   const reduced = useReducedMotionMQ()

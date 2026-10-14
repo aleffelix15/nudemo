@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { drawFront, TEX_W, TEX_H } from '../three/cardArt'
 import { useFontsReady } from '../three/hooks'
+import { NuLogo, MastercardLogo, EmvChipSvg, ContactlessWaveSvg } from './Icons'
 
-// Cartão de alta resolução gerado via canvas usado enquanto o 3D carrega ou quando não há WebGL
+// Cartão de alta resolução gerado via canvas usado pelo TiltCard
 export function useCardImage(variant = 0, width = 560) {
   const ready = useFontsReady()
   const [src, setSrc] = useState('')
@@ -17,37 +18,36 @@ export function useCardImage(variant = 0, width = 560) {
   return src
 }
 
+// Cartão Nubank 2D em CSS/SVG puro (Retina-ready, 0 KB de rede, carregamento instantâneo)
+export function SvgNuCard({
+  variant = 'roxinho',
+  name = 'GABRIELA SILVA',
+  className = '',
+}) {
+  return (
+    <div className={`nu-card-2d ${variant} ${className}`} role="img" aria-label={`Cartão Nubank ${name}`}>
+      <div className="nu-card-2d-sheen" aria-hidden="true" />
+      <div className="nu-card-2d-top">
+        <NuLogo size={36} color="#ffffff" />
+        <ContactlessWaveSvg size={22} color="rgba(255, 255, 255, 0.75)" />
+      </div>
+      <div className="nu-card-2d-chip">
+        <EmvChipSvg width={42} />
+      </div>
+      <div className="nu-card-2d-bottom">
+        <span className="nu-card-2d-name">{name}</span>
+        <MastercardLogo size={36} />
+      </div>
+    </div>
+  )
+}
+
 export default function CardFallback() {
-  const src = useCardImage(0, 600)
   return (
     <div className="card-fallback" role="img" aria-label="Cartão de crédito Nubank">
       <div className="card-fallback-glow" aria-hidden="true" />
       <div className="card-fallback-frame">
-        {src ? (
-          <img
-            src={src}
-            alt="Cartão físico Nubank demonstrativo"
-            width="360"
-            height="571"
-            className="fallback-card-img"
-            decoding="async"
-          />
-        ) : (
-          <div className="editorial-eco-card">
-            <div className="editorial-img-frame">
-              <img
-                src="/assets/app-light-and-card-ref.jpg"
-                alt="Cartão e Aplicativo Nubank"
-                width="447"
-                height="447"
-                className="editorial-eco-img"
-                loading="lazy"
-                decoding="async"
-                fetchPriority="low"
-              />
-            </div>
-          </div>
-        )}
+        <SvgNuCard />
       </div>
     </div>
   )

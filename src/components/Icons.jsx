@@ -18,9 +18,14 @@ const P = {
   barcode: 'M3 5v14M6 5v14M9 5v14M13 5v14M16 5v14M18 5v14M21 5v14',
   loan: 'M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6',
   eye: 'M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7ZM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z',
+  eyeClosed: 'M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24M1 1l22 22',
   user: 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z',
   chevron: 'M9 18l6-6-6-6',
   transfer: 'M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4',
+  bag: 'M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0',
+  shield: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
+  box: 'M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z',
+  plus: 'M12 5v14m-7-7h14',
 }
 
 export default function Icon({ name, size = 20, className = '', fill = false }) {
@@ -68,5 +73,75 @@ export function NuMark({ className = '', size = 32, color }) {
     <span className={`numark-wrap ${className}`} style={{ display: 'inline-flex', alignItems: 'center' }}>
       <NuLogo size={size} color={color || 'var(--nu)'} />
     </span>
+  )
+}
+
+// Logotipo vetorial oficial Mastercard (círculos vermelho e amarelo com blend)
+export function MastercardLogo({ size = 32, className = '' }) {
+  const h = Math.round(size * 0.62)
+  return (
+    <svg
+      width={size}
+      height={h}
+      viewBox="0 0 38 24"
+      fill="none"
+      className={className}
+      role="img"
+      aria-label="Mastercard"
+    >
+      <circle cx="12" cy="12" r="12" fill="#EB001B" />
+      <circle cx="26" cy="12" r="12" fill="#F79E1B" fillOpacity="0.94" />
+    </svg>
+  )
+}
+
+// Chip metálico EMV de alta precisão vetorial (0 KB rede)
+export function EmvChipSvg({ width = 36, className = '' }) {
+  const height = Math.round(width * 0.78)
+  return (
+    <svg
+      width={width}
+      height={height}
+      viewBox="0 0 46 36"
+      fill="none"
+      className={className}
+      role="img"
+      aria-label="Chip EMV"
+    >
+      <rect width="46" height="36" rx="6" fill="url(#emv-grad)" />
+      <path
+        d="M0 18h46M15 0v36M31 0v36M15 12h16M15 24h16"
+        stroke="#967425"
+        strokeWidth="1.2"
+        opacity="0.6"
+      />
+      <defs>
+        <linearGradient id="emv-grad" x1="0" y1="0" x2="46" y2="36" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#f8deb0" />
+          <stop offset="0.5" stopColor="#e5be62" />
+          <stop offset="1" stopColor="#c59837" />
+        </linearGradient>
+      </defs>
+    </svg>
+  )
+}
+
+// Símbolo de pagamento por aproximação (Contactless)
+export function ContactlessWaveSvg({ size = 20, className = '', color = 'currentColor' }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      className={className}
+      role="img"
+      aria-label="Pagamento por aproximação"
+    >
+      <path d="M8.5 15.5a4 4 0 0 1 0-7M12 18.5a8 8 0 0 1 0-13M15.5 21.5a12 12 0 0 1 0-19" />
+    </svg>
   )
 }

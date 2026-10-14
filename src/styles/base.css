@@ -119,6 +119,11 @@ b,
 }
 
 /* botões */
+button,
+a,
+.btn {
+  touch-action: manipulation;
+}
 .btn {
   display: inline-flex;
   align-items: center;

@@ -157,7 +157,7 @@ function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile
   })
 
   // Escala adaptativa para não cortar em telas estreitas (320px - 480px)
-  const baseScale = isSmallMobile ? 0.72 : isMobile ? 0.82 : 1
+  const baseScale = isSmallMobile ? 0.74 : isMobile ? 0.84 : 1
   const k = THREE.MathUtils.clamp((viewport.width / 5.2) * baseScale, 0.44, 1.05)
 
   return (
