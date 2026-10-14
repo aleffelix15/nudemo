@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-10-14T18:23:35.132Z",
+  "load": {
+    "durationMs": 10268,
+    "longTasks50": 14,
+    "longTasks100": 12,
+    "maxLongTaskMs": 1046
+  },
+  "scroll": {
+    "totalFrames": 359,
+    "avgFps": 59.812398993685534,
+    "p50Ms": 16.699999999999818,
+    "p95Ms": 16.800000000000182,
+    "p99Ms": 16.80000000000109,
+    "maxDeltaMs": 33.29999999999927,
+    "longTasks50": 0,
+    "longTasks100": 0
+  },
+  "heroDesktop": {
+    "avgFps": 59.98435190819787,
+    "p95Ms": 17.200000000000728
+  }
+}

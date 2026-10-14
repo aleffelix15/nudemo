@@ -8,25 +8,31 @@ import { STACK, smooth, clamp01, EPSILON } from './motion'
 import { CARD_FACE_Z } from './cardGeometry'
 import { useIsMobile, useIsSmallMobile, useIsCoarsePointer } from './hooks'
 
-function Ghost({ kit, refObj }) {
-  // Cópias fantasma simplificadas para performance e estética clean
+function Ghost({ kit, refObj, index, total }) {
+  // Cópias fantasma com degradê tonal elegante e borda sutilmente mais clara
   const mats = useMemo(() => {
+    const ratio = index / Math.max(1, total - 1)
+    const faceColor = new THREE.Color('#7808c4').lerp(new THREE.Color('#430268'), ratio)
+    const edgeColor = new THREE.Color('#8e15df').lerp(new THREE.Color('#380056'), ratio)
+
     const f = new THREE.MeshStandardMaterial({
-      color: '#6509a7',
-      metalness: 0.1,
-      roughness: 0.38,
+      color: faceColor,
+      metalness: 0.08,
+      roughness: 0.34,
       transparent: true,
       depthWrite: false,
+      precision: 'mediump',
     })
     const e = new THREE.MeshStandardMaterial({
-      color: '#4e0480',
+      color: edgeColor,
       metalness: 0.1,
-      roughness: 0.42,
+      roughness: 0.36,
       transparent: true,
       depthWrite: false,
+      precision: 'mediump',
     })
     return { f, e }
-  }, [])
+  }, [index, total])
 
   useEffect(() => () => {
     mats.f.dispose()
@@ -39,8 +45,8 @@ function Ghost({ kit, refObj }) {
 
   return (
     <group ref={(g) => (refObj.group = g)}>
-      <mesh geometry={kit.slab} material={mats.e} />
-      <mesh geometry={kit.face} material={mats.f} position={[0, 0, CARD_FACE_Z + 0.0003]} />
+      <mesh geometry={kit.slab} material={mats.e} matrixAutoUpdate={false} onUpdate={(self) => self.updateMatrix()} />
+      <mesh geometry={kit.face} material={mats.f} position={[0, 0, CARD_FACE_Z + 0.0002]} matrixAutoUpdate={false} onUpdate={(self) => self.updateMatrix()} />
     </group>
   )
 }
@@ -58,7 +64,6 @@ function Scene({ progress, copies, reduced, running, isMobile, isSmallMobile }) 
     invalidate()
     return () => {
       scene.environment = null
-      env.dispose()
     }
   }, [gl, scene, invalidate])
 
@@ -84,7 +89,6 @@ function Scene({ progress, copies, reduced, running, isMobile, isSmallMobile }) 
   }, [])
 
   useFrame((_, rawDt) => {
-    // Suspende cálculos de frame quando o Canvas estiver fora da viewport
     if (!running && !reduced) return
 
     const dt = Math.min(rawDt, 0.05)
@@ -109,9 +113,9 @@ function Scene({ progress, copies, reduced, running, isMobile, isSmallMobile }) 
       const f = n * STACK.gap * (0.2 + 0.8 * open)
       gh.group.rotation.set(rx, ry, rz)
       gh.group.position.set(STACK.dir[0] * f, STACK.dir[1] * f + drift * 0.3, STACK.dir[2] * f)
-      const a = Math.pow(1 - n / copies, 1.25) * 0.65 * open
+      const a = Math.pow(1 - n / copies, 1.35) * 0.7 * open
       if (gh.mats) gh.mats.f.opacity = gh.mats.e.opacity = a
-      gh.group.visible = a > 0.01
+      gh.group.visible = a > 0.015
     })
 
     const delta = Math.abs(smoothedP.current - prevP)
@@ -122,7 +126,6 @@ function Scene({ progress, copies, reduced, running, isMobile, isSmallMobile }) 
     }
   })
 
-  // Escala adaptativa para não cortar em telas móveis
   const baseScale = isSmallMobile ? 0.74 : isMobile ? 0.84 : 1
   const k = THREE.MathUtils.clamp((viewport.width / 6.8) * baseScale, 0.44, 1.05)
 
@@ -130,11 +133,11 @@ function Scene({ progress, copies, reduced, running, isMobile, isSmallMobile }) 
     <group scale={k} position={isMobile ? [0, 0.15, 0] : [-0.4, 0.45, 0]}>
       <NuCard ref={top} kit={kit} variant={0} />
       {ghosts.map((gh, i) => (
-        <Ghost key={i} kit={kit} refObj={gh} />
+        <Ghost key={i} kit={kit} refObj={gh} index={i} total={copies - 1} />
       ))}
-      <ambientLight intensity={0.4} color="#f6f2fc" />
-      <directionalLight position={[3, 5, 5]} intensity={1.1} />
-      {!isMobile && <directionalLight position={[-4, 1, -3]} intensity={0.7} color="#b98cff" />}
+      <ambientLight intensity={0.35} color="#f6f2fc" />
+      <directionalLight position={[3, 5, 5]} intensity={1.0} />
+      {!isMobile && <directionalLight position={[-4, 1, -3]} intensity={0.65} color="#b98cff" />}
     </group>
   )
 }
@@ -154,7 +157,7 @@ export default function StackScene({ progress, running, reduced, mobile }) {
         pointerEvents: isCoarse ? 'none' : 'auto',
       }}
       frameloop="demand"
-      dpr={isMobile ? [1, 1.25] : [1, 2]}
+      dpr={isMobile ? [1, 1.25] : [1, 1.75]}
       camera={{
         position: [0, 0, isSmallMobile ? 12.2 : isMobile ? 11.4 : 10.5],
         fov: 28,
@@ -174,7 +177,7 @@ export default function StackScene({ progress, running, reduced, mobile }) {
           gl.domElement.style.pointerEvents = 'none'
         }
         gl.toneMapping = THREE.ACESFilmicToneMapping
-        gl.toneMappingExposure = 1.05
+        gl.toneMappingExposure = 1.0
       }}
       aria-label="Cascata tridimensional de cartões Nubank"
       role="img"

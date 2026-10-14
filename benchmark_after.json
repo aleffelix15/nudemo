@@ -1,0 +1,52 @@
+{
+  "timestamp": "2026-10-14T18:52:01.171Z",
+  "load": {
+    "durationMs": 10698,
+    "longTasks50": 14,
+    "longTasks100": 12,
+    "maxLongTaskMs": 972
+  },
+  "scroll": {
+    "totalFrames": 358,
+    "avgFps": 59.81121042519422,
+    "p50Ms": 16.699999999999818,
+    "p95Ms": 16.800000000000182,
+    "p99Ms": 16.900000000000546,
+    "maxDeltaMs": 33.399999999999636,
+    "longTasks50": 0,
+    "longTasks100": 0
+  },
+  "heroDesktop": {
+    "avgFps": 59.97866143775774,
+    "p95Ms": 17.200000000000728
+  },
+  "colorSamples": [
+    {
+      "x": 360,
+      "y": 250,
+      "label": "Ponto 1 (Superior)",
+      "r": 137,
+      "g": 0,
+      "b": 203,
+      "hex": "#8900cb"
+    },
+    {
+      "x": 420,
+      "y": 350,
+      "label": "Ponto 2 (Médio)",
+      "r": 125,
+      "g": 0,
+      "b": 199,
+      "hex": "#7d00c7"
+    },
+    {
+      "x": 340,
+      "y": 420,
+      "label": "Ponto 3 (Inferior)",
+      "r": 126,
+      "g": 0,
+      "b": 199,
+      "hex": "#7e00c7"
+    }
+  ]
+}

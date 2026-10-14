@@ -10,7 +10,7 @@ Recriação e refatoração de alta precisão da experiência digital do Nubank,
 ## ✨ Funcionalidades e Destaques
 
 - **Cartão 3D Físico Vertical (PBR)**: Geometria em padrão ISO/IEC 7810 ID-1 ($1 : 1.5858$), material `MeshPhysicalMaterial` com acabamento roxo acetinado metálico, chanfro microscópico e chip EMV prateado com relevo de contatos elétricos.
-- **Identidade Visual Autêntica**: Bandeira oficial Mastercard no topo esquerdo, gravação do titular (*Gabriela Lima*) e logotipo vetorial contínuo `nu` fiel à marca.
+- **Identidade Visual Autêntica**: Marcador de bandeira em duas circunferências sobrepostas (representação gráfica genérica de marca de pagamento de terceiros), gravação do titular (*Gabriela Lima*), chip EMV em ouro/champagne e logotipo oficial `nu` com fita contínua translúcida extraído da referência oficial.
 - **Motion Design Suave e Amortecido**: Rotação orientada pelo scroll com `THREE.MathUtils.damp`, inclinação por movimento do cursor limitada a $\pm 8^\circ$ e suporte completo a `prefers-reduced-motion: reduce`.
 - **Mockup do Aplicativo**: Integração da interface real do app Nubank em Modo Escuro sem vazamento de bordas, além de seletor interativo para visualização do ecossistema Conta & Cartão.
 - **Design System e Acessibilidade**: Paleta sóbria (`#070709`, `#121216`, `#820AD1`), tipografia com números tabulares (`tabular-nums`), contraste de texto superior a 14:1 e estados `:focus-visible` claros.

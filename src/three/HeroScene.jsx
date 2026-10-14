@@ -3,30 +3,31 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import NuCard from './NuCard'
 import { getSharedCardKit } from './cardKit'
-import { applyStudioEnvironment, radialTexture } from './stage'
+import { applyStudioEnvironment, getContactShadowTexture, getAmbientShadowTexture } from './stage'
 import { HERO, easeInOutCubic, EPSILON } from './motion'
 import { VARIANTS } from './cardArt'
 import { useIsMobile, useIsSmallMobile, useIsCoarsePointer, getScrollY } from './hooks'
 
 const FLOOR_Y = -2.15
 
-function FloorShadow({ refObj }) {
-  const map = useMemo(
-    () =>
-      radialTexture([
-        [0, 'rgba(20, 5, 40, 0.5)'],
-        [0.35, 'rgba(20, 5, 40, 0.22)'],
-        [0.7, 'rgba(20, 5, 40, 0.05)'],
-        [1, 'rgba(20, 5, 40, 0)'],
-      ]),
-    []
-  )
-  useEffect(() => () => map.dispose(), [map])
+// Sombra em duas camadas: contato estreito e escuro + ambiente suave e difuso
+function TwoTierShadow({ contactRef, ambientRef }) {
+  const contactMap = useMemo(() => getContactShadowTexture(), [])
+  const ambientMap = useMemo(() => getAmbientShadowTexture(), [])
+
   return (
-    <mesh ref={refObj} position={[0, FLOOR_Y, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={-1}>
-      <planeGeometry args={[3.6, 2.4]} />
-      <meshBasicMaterial map={map} transparent depthWrite={false} toneMapped={false} />
-    </mesh>
+    <group position={[0, FLOOR_Y, 0]}>
+      {/* 1. Sombra ambiente suave e ampla */}
+      <mesh ref={ambientRef} rotation={[-Math.PI / 2, 0, 0]} renderOrder={-2} position={[0, -0.002, 0]}>
+        <planeGeometry args={[3.8, 2.4]} />
+        <meshBasicMaterial map={ambientMap} transparent depthWrite={false} toneMapped={false} />
+      </mesh>
+      {/* 2. Sombra de contato escura diretamente sob a base do cartão */}
+      <mesh ref={contactRef} rotation={[-Math.PI / 2, 0, 0]} renderOrder={-1} position={[0, 0, 0]}>
+        <planeGeometry args={[2.2, 0.9]} />
+        <meshBasicMaterial map={contactMap} transparent depthWrite={false} toneMapped={false} />
+      </mesh>
+    </group>
   )
 }
 
@@ -44,13 +45,13 @@ function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile
     onReady?.()
     return () => {
       scene.environment = null
-      env.dispose()
     }
   }, [gl, scene, invalidate, onReady])
 
   const card = useRef()
   const rig = useRef()
-  const shadow = useRef()
+  const contactShadow = useRef()
+  const ambientShadow = useRef()
   const isSleeping = useRef(false)
   const st = useRef({ t: 0, variant: 0, px: 0, py: 0, tx: 0, ty: 0, scroll: 0 })
 
@@ -88,19 +89,19 @@ function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile
   }, [interactive, reduced, isMobile])
 
   useFrame((_, rawDt) => {
-    // Suspende cálculos quando fora da viewport
     if (!running && !reduced) return
     const s = st.current
     const dt = Math.min(rawDt, 0.05)
     const g = card.current?.group
     if (!g) return
 
-    // Respeito estrito a prefers-reduced-motion: pose estática elegante
     if (reduced) {
       g.rotation.set(HERO.reducedPitch, HERO.reducedYaw, HERO.reducedTilt)
-      if (shadow.current) {
-        shadow.current.scale.set(0.9, 0.85, 1)
-        shadow.current.material.opacity = 0.5
+      if (contactShadow.current && ambientShadow.current) {
+        contactShadow.current.scale.set(0.9, 0.85, 1)
+        contactShadow.current.material.opacity = 0.65
+        ambientShadow.current.scale.set(0.95, 0.9, 1)
+        ambientShadow.current.material.opacity = 0.45
       }
       return
     }
@@ -123,11 +124,9 @@ function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile
     const prevPy = s.py
     const prevScroll = s.scroll
 
-    // Amortecimento suave de ponteiro (THREE.MathUtils.damp, sem jitter)
     s.px = THREE.MathUtils.damp(s.px, s.tx, 3.5, dt)
     s.py = THREE.MathUtils.damp(s.py, s.ty, 3.5, dt)
 
-    // Amortecimento suave do scroll sem re-render
     const targetScroll = getScrollY()
     s.scroll = THREE.MathUtils.damp(s.scroll, targetScroll, 4, dt)
 
@@ -137,13 +136,15 @@ function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile
 
     g.rotation.set(rotX, rotY, rotZ)
 
-    if (shadow.current) {
+    if (contactShadow.current && ambientShadow.current) {
       const apparent = Math.abs(Math.cos(rotY))
-      shadow.current.scale.set(0.6 + 0.45 * apparent, 0.85, 1)
-      shadow.current.material.opacity = 0.45 + 0.3 * apparent
+      contactShadow.current.scale.set(0.45 + 0.5 * apparent, 0.8, 1)
+      contactShadow.current.material.opacity = 0.5 + 0.35 * apparent
+
+      ambientShadow.current.scale.set(0.65 + 0.35 * apparent, 0.85, 1)
+      ambientShadow.current.material.opacity = 0.3 + 0.25 * apparent
     }
 
-    // Verificação de convergência (epsilon check): para o loop quando atinge o repouso
     const delta =
       Math.abs(s.px - prevPx) +
       Math.abs(s.py - prevPy) +
@@ -156,19 +157,17 @@ function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile
     }
   })
 
-  // Escala adaptativa para não cortar em telas estreitas (320px - 480px)
   const baseScale = isSmallMobile ? 0.74 : isMobile ? 0.84 : 1
   const k = THREE.MathUtils.clamp((viewport.width / 5.2) * baseScale, 0.44, 1.05)
 
   return (
     <group ref={rig} scale={k} position={[0.02, 0.05, 0]}>
       <NuCard ref={card} kit={kit} variant={0} />
-      <FloorShadow refObj={shadow} />
-      {/* Iluminação de estúdio: máximo 2 luzes direcionais + 1 ambient no mobile */}
-      <ambientLight intensity={0.45} color="#f5f0fa" />
-      <directionalLight position={[3, 4.5, 5]} intensity={1.15} color="#ffffff" />
-      {!isMobile && <directionalLight position={[-3, 2, 4]} intensity={0.45} color="#eedeff" />}
-      <directionalLight position={[-4, 1.5, -3]} intensity={0.8} color="#b98cff" />
+      <TwoTierShadow contactRef={contactShadow} ambientRef={ambientShadow} />
+      {/* Iluminação de estúdio fotorealista: key light superior frontal + rim light violeta de recorte */}
+      <ambientLight intensity={0.68} color="#fcf8ff" />
+      <directionalLight position={[2.5, 4.2, 4.2]} intensity={1.35} color="#ffffff" />
+      <directionalLight position={[-3.6, 1.6, -3.2]} intensity={0.85} color="#b88cff" />
     </group>
   )
 }
@@ -186,7 +185,7 @@ export default function HeroScene({ reduced, interactive, running, onReady }) {
         pointerEvents: isCoarse ? 'none' : 'auto',
       }}
       frameloop="demand"
-      dpr={isMobile ? [1, 1.25] : [1, 2]}
+      dpr={isMobile ? [1, 1.25] : [1, 1.75]}
       camera={{
         position: [0, 0.2, isSmallMobile ? 11.2 : isMobile ? 10.4 : 9.5],
         fov: 28,
@@ -206,7 +205,7 @@ export default function HeroScene({ reduced, interactive, running, onReady }) {
           gl.domElement.style.pointerEvents = 'none'
         }
         gl.toneMapping = THREE.ACESFilmicToneMapping
-        gl.toneMappingExposure = 1.05
+        gl.toneMappingExposure = 1.42
         camera.lookAt(0, 0, 0)
       }}
       aria-label="Modelo tridimensional interativo do cartão de crédito Nubank"

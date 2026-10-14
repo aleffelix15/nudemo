@@ -18,7 +18,7 @@ export function getSharedCardKit(maxAniso = 16) {
   return sharedCardKit
 }
 
-// Cria kit de geometrias, texturas e materiais PBR com resposta especular contrastada
+// Cria kit de geometrias, texturas e materiais PBR com acabamento fotorealista
 export function createCardKit(maxAniso = 16) {
   if (sharedCardKit) return sharedCardKit
 
@@ -27,17 +27,17 @@ export function createCardKit(maxAniso = 16) {
   const precision = isMobile ? 'mediump' : 'highp'
 
   const slab = getSlabGeometry(isMobile)
-  const face = getFaceGeometry(CARD.bevel, isMobile)
+  const face = getFaceGeometry(CARD.bevel * 0.88, isMobile)
   const chipGeo = getChipGeometry(0.307, 0.236, 0.038, 0.0018, isMobile)
   const chipTex = tex(drawChip(), { aniso: effectiveAniso })
 
-  // Material metálico dedicado do chip EMV com resposta especular intensa
+  // Material metálico dedicado do chip EMV em ouro/champagne sem resíduo cinza
   const chipMat = new THREE.MeshStandardMaterial({
     map: chipTex,
     metalness: 0.88,
-    roughness: 0.20,
-    color: '#D4D4D8',
-    envMapIntensity: isMobile ? 1.0 : 1.4,
+    roughness: 0.22,
+    color: '#ffffff', // Multiplicador neutro para preservar o ouro champagne autêntico
+    envMapIntensity: isMobile ? 1.0 : 1.35,
     precision,
   })
 
@@ -46,57 +46,56 @@ export function createCardKit(maxAniso = 16) {
     const front = tex(drawFront(i), { aniso: effectiveAniso })
     const back = tex(drawBack(i), { aniso: effectiveAniso })
 
-    // MeshPhysicalMaterial com especificações físicas do policarbonato roxo e metal escovado
-    const matProps = v.metal
-      ? {
-          metalness: 0.85,
-          roughness: 0.25,
-          clearcoat: isMobile ? 0.12 : 0.18,
-          clearcoatRoughness: 0.20,
-          envMapIntensity: isMobile ? 1.0 : 1.5,
+    // Configuração de material para face frontal
+    const frontMat = isMobile
+      ? new THREE.MeshStandardMaterial({
+          map: front,
+          roughness: 0.28,
+          metalness: v.metal ? 0.85 : 0.06,
+          precision: 'mediump',
+        })
+      : new THREE.MeshPhysicalMaterial({
+          map: front,
+          bumpMap: bump,
+          bumpScale: v.metal ? 0.22 : 0.06,
+          metalness: v.metal ? 0.88 : 0.06, // Roxo < 0.1 conforme especificação
+          roughness: v.metal ? 0.24 : 0.28,
+          clearcoat: v.metal ? 0.15 : 0.35,
+          clearcoatRoughness: 0.22,
+          envMapIntensity: v.metal ? 1.4 : 1.15,
+          anisotropy: v.metal ? 0.85 : 0, // Reflexo anisotrópico escovado horizontal para Ultravioleta
+          anisotropyRotation: 0,
           precision,
-        }
-      : {
-          metalness: 0.15,
-          roughness: 0.30,
-          clearcoat: isMobile ? 0.22 : 0.35,
-          clearcoatRoughness: 0.25,
-          envMapIntensity: isMobile ? 0.95 : 1.15,
-          precision,
-        }
+        })
 
-    const mk = (map) =>
-      isMobile
-        ? new THREE.MeshStandardMaterial({
-            map,
-            roughness: 0.28,
-            metalness: 0.18,
-            precision: 'mediump',
-          })
-        : new THREE.MeshPhysicalMaterial({
-            map,
-            bumpMap: bump,
-            bumpScale: v.metal ? 0.25 : 0.07,
-            ...matProps,
-          })
+    // Verso usa MeshStandardMaterial (economia de GPU, clearcoat desnecessário no verso)
+    const backMat = new THREE.MeshStandardMaterial({
+      map: back,
+      roughness: 0.34,
+      metalness: v.metal ? 0.75 : 0.05,
+      envMapIntensity: isMobile ? 0.8 : 1.0,
+      precision,
+    })
 
+    // Borda chanfrada ISO que reflete o rim light de estúdio
     const edge = isMobile
       ? new THREE.MeshStandardMaterial({
           color: v.edge,
-          roughness: 0.28,
-          metalness: 0.18,
+          roughness: 0.26,
+          metalness: v.metal ? 0.85 : 0.08,
           precision: 'mediump',
         })
       : new THREE.MeshPhysicalMaterial({
           color: v.edge,
-          metalness: v.metal ? 0.85 : 0.15,
-          roughness: v.metal ? 0.25 : 0.30,
-          clearcoat: 0.25,
-          envMapIntensity: 1.1,
+          metalness: v.metal ? 0.88 : 0.08,
+          roughness: 0.26,
+          clearcoat: 0.30,
+          clearcoatRoughness: 0.20,
+          envMapIntensity: 1.25,
           precision,
         })
 
-    return { front: mk(front), back: mk(back), edge, frontMap: front, meta: v }
+    return { front: frontMat, back: backMat, edge, frontMap: front, meta: v }
   })
 
   const kit = {
@@ -105,9 +104,7 @@ export function createCardKit(maxAniso = 16) {
     chipGeo,
     chipMat,
     variants,
-    dispose() {
-      // Como o kit é um singleton reutilizado entre telas, mantemos vivo para evitar recriação
-    },
+    dispose() {},
   }
 
   sharedCardKit = kit
