@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { drawFront, TEX_W, TEX_H } from '../three/cardArt'
+import { drawFront, TEX_W, TEX_H, HOLDER_NAME } from '../three/cardArt'
 import { useFontsReady } from '../three/hooks'
 import { NuLogo, MastercardLogo, EmvChipSvg, ContactlessWaveSvg } from './Icons'
 
@@ -21,7 +21,7 @@ export function useCardImage(variant = 0, width = 560) {
 // Cartão Nubank 2D em CSS/SVG puro (Retina-ready, 0 KB de rede, carregamento instantâneo)
 export function SvgNuCard({
   variant = 'roxinho',
-  name = 'GABRIELA SILVA',
+  name = HOLDER_NAME,
   className = '',
 }) {
   return (

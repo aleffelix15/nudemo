@@ -74,39 +74,30 @@ function roundedPath(ctx, x, y, w, h, r) {
   ctx.closePath()
 }
 
-// Marcador genérico da bandeira (duas circunferências sobrepostas)
-export function drawMastercard(ctx, x, y, r = 44) {
-  const d = r * 1.22
+// Titular fictício padronizado do projeto
+export const HOLDER_NAME = 'Marina A C Costa'
+
+// Marcador neutro da bandeira de pagamento (dois círculos sobrepostos em violeta claro e magenta translúcidos)
+export function drawPaymentBadge(ctx, x, y, r = 44) {
+  const d = r * 1.18
   const x1 = x
   const x2 = x + d
 
-  // Círculo Vermelho
   ctx.save()
-  ctx.fillStyle = '#EB001B'
+  // Círculo Violeta Claro Translúcido
+  ctx.fillStyle = 'rgba(216, 180, 254, 0.78)'
   ctx.beginPath()
   ctx.arc(x1, y, r, 0, Math.PI * 2)
   ctx.fill()
-  ctx.restore()
 
-  // Círculo Amarelo-Alaranjado
-  ctx.save()
-  ctx.fillStyle = '#F79E1B'
-  ctx.beginPath()
-  ctx.arc(x2, y, r, 0, Math.PI * 2)
-  ctx.fill()
-  ctx.restore()
-
-  // Interseção Laranja
-  ctx.save()
-  ctx.beginPath()
-  ctx.arc(x1, y, r, 0, Math.PI * 2)
-  ctx.clip()
-  ctx.fillStyle = '#FF5F00'
+  // Círculo Magenta Translúcido
+  ctx.fillStyle = 'rgba(244, 114, 182, 0.70)'
   ctx.beginPath()
   ctx.arc(x2, y, r, 0, Math.PI * 2)
   ctx.fill()
   ctx.restore()
 }
+export const drawMastercard = drawPaymentBadge
 
 // Desenha o logotipo oficial com fita contínua e proporção exata
 export function drawNuLogo(ctx, x, y, targetWidth = 145, opacity = 1) {
@@ -200,10 +191,10 @@ export function drawFront(variant = 0, { rounded = false, W, H } = {}) {
   ctx.letterSpacing = '1.2px'
   // Sombra leve de gravação/relevo
   ctx.fillStyle = 'rgba(0, 0, 0, 0.28)'
-  ctx.fillText('Gabriela Lima', 132, 942)
+  ctx.fillText(HOLDER_NAME, 132, 942)
   // Texto principal
   ctx.fillStyle = v.inkSoft
-  ctx.fillText('Gabriela Lima', 130, 940)
+  ctx.fillText(HOLDER_NAME, 130, 940)
   ctx.restore()
 
   // 4. Canto Inferior Esquerdo: Logotipo oficial "nu"
@@ -260,7 +251,7 @@ export function drawBack(variant = 0, { W, H } = {}) {
   // Mensagens legais de demonstração
   ctx.fillStyle = v.inkSoft
   ctx.font = `500 32px ${FONT}`
-  ctx.fillText('Gabriela Lima', 120, h * 0.52)
+  ctx.fillText(HOLDER_NAME, 120, h * 0.52)
 
   ctx.fillStyle = 'rgba(255, 255, 255, 0.65)'
   ctx.font = `450 26px ${FONT}`

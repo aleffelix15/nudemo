@@ -77,6 +77,7 @@ export function NuMark({ className = '', size = 32, color }) {
 }
 
 // Logotipo vetorial oficial Mastercard (círculos vermelho e amarelo com blend)
+// Marcador neutro da bandeira de pagamento (dois círculos sobrepostos em violeta claro e magenta translúcidos)
 export function MastercardLogo({ size = 32, className = '' }) {
   const h = Math.round(size * 0.62)
   return (
@@ -87,13 +88,14 @@ export function MastercardLogo({ size = 32, className = '' }) {
       fill="none"
       className={className}
       role="img"
-      aria-label="Mastercard"
+      aria-label="Bandeira de pagamento (ilustração)"
     >
-      <circle cx="12" cy="12" r="12" fill="#EB001B" />
-      <circle cx="26" cy="12" r="12" fill="#F79E1B" fillOpacity="0.94" />
+      <circle cx="12" cy="12" r="11" fill="rgba(216, 180, 254, 0.85)" />
+      <circle cx="25" cy="12" r="11" fill="rgba(244, 114, 182, 0.75)" />
     </svg>
   )
 }
+export const PaymentBadgeSvg = MastercardLogo
 
 // Chip metálico EMV de alta precisão vetorial (0 KB rede)
 export function EmvChipSvg({ width = 36, className = '' }) {

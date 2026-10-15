@@ -36,6 +36,15 @@ export default function Hero() {
   return (
     <section className="hero" id="topo" aria-label="Apresentação do Nubank">
       <div className="hero-copy">
+        <motion.div
+          className="hero-badge"
+          initial={reduced ? false : { opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          role="note"
+        >
+          Conceito de redesign independente. Sem vínculo com o Nubank. Dados fictícios.
+        </motion.div>
         <h1 className="hero-title" aria-label={HERO.title.join(' ')}>
           {HERO.title.map((t, i) => (
             <span className="mask" key={t} aria-hidden="true">

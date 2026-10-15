@@ -110,6 +110,6 @@ export const FOOTER = {
     { title: 'Ajuda', links: ['Central de ajuda', 'Segurança', 'Fale com a gente'] },
     { title: 'Institucional', links: ['Sobre', 'Privacidade', 'Termos de uso'] },
   ],
-  disclaimer: 'Projeto demonstrativo independente, sem vínculo oficial com o Nubank.',
+  disclaimer: 'Conceito de redesign independente. Sem vínculo com o Nubank. Dados fictícios.',
   legal: 'Nomes, marcas e referências visuais pertencem aos seus respectivos titulares.',
 }
