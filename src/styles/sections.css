@@ -116,6 +116,18 @@ h3 {
   height: 100% !important;
   touch-action: pan-y !important;
 }
+.hero-canvas {
+  opacity: 0;
+  transition: opacity 0.5s ease-out;
+}
+.hero-stage.is-ready .hero-canvas {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-canvas {
+    transition: none;
+  }
+}
 .card-fallback {
   position: absolute;
   inset: 0;

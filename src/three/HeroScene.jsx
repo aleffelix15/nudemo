@@ -40,19 +40,24 @@ function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile
 
   const kit = useMemo(() => getSharedCardKit(gl.capabilities.getMaxAnisotropy()), [gl])
 
+  // onReady fica em ref: a identidade da função não pode recriar o ambiente PMREM
+  const onReadyRef = useRef(onReady)
+  onReadyRef.current = onReady
+  const firedReady = useRef(false)
+
   useEffect(() => {
-    const env = applyStudioEnvironment(gl, scene)
+    applyStudioEnvironment(gl, scene)
     invalidate()
-    onReady?.()
     return () => {
       scene.environment = null
       disposeStudioEnvironment?.(gl)
     }
-  }, [gl, scene, invalidate, onReady])
+  }, [gl, scene, invalidate])
 
   // Desperta a renderização quando running passa para true
   useEffect(() => {
     if (running) {
+      st.current.lastNow = performance.now() // o tempo fora da tela não conta
       invalidate()
     }
   }, [running, invalidate])
@@ -102,12 +107,20 @@ function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile
 
     const s = st.current
     const now = performance.now()
-    const realDt = Math.min((now - s.lastNow) / 1000, 0.1)
+    // Relógio real: o limite só protege contra aba oculta. Um limite de 0,1 s fazia o
+    // repouso durar vários segundos, pois o loop dorme e acorda por timer.
+    const realDt = Math.min((now - s.lastNow) / 1000, 1.5)
     s.lastNow = now
 
     const dt = Math.min(rawDt, 0.05)
     const g = card.current?.group
     if (!g) return
+
+    // Avisa o pai só depois do primeiro frame desenhado
+    if (!firedReady.current) {
+      firedReady.current = true
+      requestAnimationFrame(() => onReadyRef.current?.())
+    }
 
     if (reduced) {
       g.rotation.set(HERO.reducedPitch, HERO.reducedYaw, HERO.reducedTilt)
@@ -122,7 +135,7 @@ function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile
 
     const period = HERO.dwell + HERO.spin
     // O tempo avança com o relógio real para que o repouso termine sozinho
-    s.t += Math.max(dt, realDt)
+    s.t += realDt
     const cycle = Math.floor(s.t / period)
     const phase = s.t - cycle * period
     let u = 0
