@@ -18,7 +18,7 @@ export function useCardImage(variant = 0, width = 560) {
   return src
 }
 
-// Cartão Nubank 2D em CSS/SVG puro (Retina-ready, 0 KB de rede, carregamento instantâneo)
+// Cartão Nubank 2D em CSS/SVG puro (fiel à referência física oficial e à cena 3D)
 export function SvgNuCard({
   variant = 'roxinho',
   name = HOLDER_NAME,
@@ -28,15 +28,19 @@ export function SvgNuCard({
     <div className={`nu-card-2d ${variant} ${className}`} role="img" aria-label={`Cartão Nubank ${name}`}>
       <div className="nu-card-2d-sheen" aria-hidden="true" />
       <div className="nu-card-2d-top">
-        <NuLogo size={36} color="#ffffff" />
-        <ContactlessWaveSvg size={22} color="rgba(255, 255, 255, 0.75)" />
+        <div className="nu-card-2d-top-badge">
+          <MastercardLogo size={36} />
+          <ContactlessWaveSvg size={18} color="rgba(255, 255, 255, 0.85)" />
+        </div>
+        <div className="nu-card-2d-chip">
+          <EmvChipSvg width={42} />
+        </div>
       </div>
-      <div className="nu-card-2d-chip">
-        <EmvChipSvg width={42} />
+      <div className="nu-card-2d-middle">
+        <span className="nu-card-2d-name">{name}</span>
       </div>
       <div className="nu-card-2d-bottom">
-        <span className="nu-card-2d-name">{name}</span>
-        <MastercardLogo size={36} />
+        <NuLogo size={38} color="#ffffff" />
       </div>
     </div>
   )

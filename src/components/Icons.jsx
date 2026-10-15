@@ -97,31 +97,34 @@ export function MastercardLogo({ size = 32, className = '' }) {
 }
 export const PaymentBadgeSvg = MastercardLogo
 
-// Chip metálico EMV de alta precisão vetorial (0 KB rede)
+// Chip metálico EMV de alta precisão vetorial (prateado/champagne, padrão ISO/IEC 7816)
 export function EmvChipSvg({ width = 36, className = '' }) {
-  const height = Math.round(width * 0.78)
+  const height = Math.round(width * 0.76)
   return (
     <svg
       width={width}
       height={height}
-      viewBox="0 0 46 36"
+      viewBox="0 0 46 35"
       fill="none"
       className={className}
       role="img"
       aria-label="Chip EMV"
     >
-      <rect width="46" height="36" rx="6" fill="url(#emv-grad)" />
+      <rect width="46" height="35" rx="5" fill="url(#emv-silver-grad)" />
+      {/* Contornos e relevos elétricos padrão ISO */}
+      <rect x="13" y="8" width="20" height="19" rx="3" stroke="#64748b" strokeWidth="1.2" opacity="0.65" />
       <path
-        d="M0 18h46M15 0v36M31 0v36M15 12h16M15 24h16"
-        stroke="#967425"
+        d="M0 17.5h13M33 17.5h13M23 0v8M23 27v8M13 13H0M33 13h13M13 22H0M33 22h13"
+        stroke="#64748b"
         strokeWidth="1.2"
         opacity="0.6"
       />
       <defs>
-        <linearGradient id="emv-grad" x1="0" y1="0" x2="46" y2="36" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#f8deb0" />
-          <stop offset="0.5" stopColor="#e5be62" />
-          <stop offset="1" stopColor="#c59837" />
+        <linearGradient id="emv-silver-grad" x1="0" y1="0" x2="46" y2="35" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#f8fafc" />
+          <stop offset="0.35" stopColor="#e2e8f0" />
+          <stop offset="0.7" stopColor="#cbd5e1" />
+          <stop offset="1" stopColor="#94a3b8" />
         </linearGradient>
       </defs>
     </svg>
@@ -137,13 +140,13 @@ export function ContactlessWaveSvg({ size = 20, className = '', color = 'current
       viewBox="0 0 24 24"
       fill="none"
       stroke={color}
-      strokeWidth="1.8"
+      strokeWidth="2"
       strokeLinecap="round"
       className={className}
       role="img"
       aria-label="Pagamento por aproximação"
     >
-      <path d="M8.5 15.5a4 4 0 0 1 0-7M12 18.5a8 8 0 0 1 0-13M15.5 21.5a12 12 0 0 1 0-19" />
+      <path d="M6 15a4 4 0 0 1 0-6M10 18a8 8 0 0 1 0-12M14 21a12 12 0 0 1 0-18" />
     </svg>
   )
 }

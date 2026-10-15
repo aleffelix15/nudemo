@@ -839,10 +839,10 @@ h3 {
   width: min(72vw, 260px);
   aspect-ratio: 54 / 85.6;
   border-radius: 18px;
-  background: linear-gradient(155deg, #7b0dbd 0%, #560882 50%, #3a0254 100%);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: linear-gradient(155deg, #820ad1 0%, #6d07b4 50%, #4a037a 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.35);
-  padding: 22px 20px;
+  padding: 24px 20px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -852,7 +852,7 @@ h3 {
   box-sizing: border-box;
 }
 .nu-card-2d.ultravioleta {
-  background: linear-gradient(155deg, #1b1722 0%, #110e17 55%, #08060c 100%);
+  background: linear-gradient(155deg, #1d1824 0%, #110d16 55%, #09070c 100%);
   border-color: rgba(181, 124, 240, 0.3);
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.2);
 }
@@ -867,23 +867,31 @@ h3 {
 .nu-card-2d-top {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
+}
+.nu-card-2d-top-badge {
+  display: flex;
   align-items: center;
+  gap: 8px;
 }
 .nu-card-2d-chip {
-  margin-top: 14px;
+  margin-top: 2px;
+}
+.nu-card-2d-middle {
+  margin-top: auto;
+  margin-bottom: 24px;
 }
 .nu-card-2d-bottom {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: flex-end;
-  margin-top: auto;
 }
 .nu-card-2d-name {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: rgba(255, 255, 255, 0.85);
-  text-transform: uppercase;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.92);
+  text-transform: none;
 }
 
 /* Card editorial de apresentação do Ecossistema Conta + Cartão */
