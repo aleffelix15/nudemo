@@ -8,7 +8,6 @@ import {
   useCanvasVisibility,
   useIsMobile,
   useReducedMotionMQ,
-  useFontsReady,
   useSectionScrollProgress,
   useNearViewport,
 } from '../three/hooks'
@@ -21,24 +20,25 @@ export default function Easy() {
   const isVisible = useCanvasVisibility(ref, '250px 0px')
   const mobile = useIsMobile()
   const reduced = useReducedMotionMQ()
-  const fonts = useFontsReady()
   const [gl] = useState(() => hasWebGL())
   const progress = useSectionScrollProgress(ref)
 
   return (
     <section className="easy" id="facilidades" ref={ref} aria-label="Facilidades do Nubank">
       <div className="easy-stage" aria-hidden="true">
-        {gl && fonts && isNear ? (
-          <SceneBoundary fallback={<CardFallback />}>
-            <Suspense fallback={<CardFallback />}>
-              <StackScene
-                progress={progress}
-                running={isVisible}
-                reduced={reduced}
-                mobile={mobile}
-              />
-            </Suspense>
-          </SceneBoundary>
+        {gl ? (
+          isNear ? (
+            <SceneBoundary fallback={<CardFallback />}>
+              <Suspense fallback={null}>
+                <StackScene
+                  progress={progress}
+                  running={isVisible}
+                  reduced={reduced}
+                  mobile={mobile}
+                />
+              </Suspense>
+            </SceneBoundary>
+          ) : null
         ) : (
           <CardFallback />
         )}

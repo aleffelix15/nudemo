@@ -1,8 +1,8 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { HERO } from '../content'
 import { useDemo } from '../lib/demo'
-import { hasWebGL, useCanvasVisibility, useIsMobile, useReducedMotionMQ, useFontsReady } from '../three/hooks'
+import { hasWebGL, useCanvasVisibility, useIsMobile, useReducedMotionMQ } from '../three/hooks'
 import CardFallback from './CardFallback'
 import SceneBoundary from './SceneBoundary'
 
@@ -19,19 +19,10 @@ export default function Hero() {
   const isVisible = useCanvasVisibility(stage, '250px 0px')
   const mobile = useIsMobile()
   const reduced = useReducedMotionMQ()
-  const fonts = useFontsReady()
   const [gl] = useState(() => hasWebGL())
   const [ready, setReady] = useState(false)
-  const [timedOut, setTimedOut] = useState(false)
   const onReady = useCallback(() => setReady(true), [])
-
-  // O cartão 2D só aparece se o 3D falhar ou demorar demais; no caminho normal o 3D surge
-  // com fade, sem trocar um cartão por outro.
-  useEffect(() => {
-    const t = setTimeout(() => setTimedOut(true), 4000)
-    return () => clearTimeout(t)
-  }, [])
-  const showFallback = !gl || (timedOut && !ready)
+  const showFallback = !gl
 
   return (
     <section className="hero" id="topo" aria-label="Apresentação do Nubank">
@@ -106,7 +97,7 @@ export default function Hero() {
       </div>
 
       <div className={`hero-stage ${ready ? 'is-ready' : ''}`} ref={stage}>
-        {gl && fonts ? (
+        {gl ? (
           <SceneBoundary fallback={<CardFallback />}>
             <Suspense fallback={null}>
               <HeroScene
