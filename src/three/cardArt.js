@@ -99,6 +99,10 @@ export function drawPaymentBadge(ctx, x, y, r = 44) {
 }
 export const drawMastercard = drawPaymentBadge
 
+import { NU_SVG_PATH } from '../components/Icons'
+
+const nuPath = typeof Path2D !== 'undefined' ? new Path2D(NU_SVG_PATH) : null
+
 // Desenha o logotipo oficial com fita contínua e proporção exata
 export function drawNuLogo(ctx, x, y, targetWidth = 145, opacity = 1) {
   const img = getNuImage()
@@ -109,10 +113,12 @@ export function drawNuLogo(ctx, x, y, targetWidth = 145, opacity = 1) {
   ctx.globalAlpha = opacity
   if (img && img.complete && img.naturalWidth > 0) {
     ctx.drawImage(img, x, y, targetWidth, targetHeight)
-  } else {
+  } else if (nuPath) {
+    const scale = targetWidth / 24
+    ctx.translate(x, y)
+    ctx.scale(scale, scale)
     ctx.fillStyle = '#ffffff'
-    roundedPath(ctx, x, y, targetWidth, targetHeight, 12)
-    ctx.fill()
+    ctx.fill(nuPath)
   }
   ctx.restore()
 }
