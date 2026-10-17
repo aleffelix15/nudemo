@@ -1,103 +1,138 @@
 # NuDemo — Experiência Fintech & Engenharia de Performance WebGL
 
-> **AVISO LEGAL / DISCLAIMER DE PORTFÓLIO INDEPENDENTE:**  
+> **AVISO LEGAL / DISCLAIMER DE ESTUDO INDEPENDENTE:**  
 > Este projeto é uma **demonstração técnica independente de engenharia de software frontend, computação gráfica com WebGL e design de produto fintech**.  
 > **Não possui qualquer vínculo institucional, comercial ou societário com o Nubank (Nu Pagamentos S.A. / Nu Financeira S.A.)**.  
-> Todas as marcas, logotipos, identidades visuais e patentes referenciadas são de titularidade de seus respectivos proprietários. Todos os dados, saldos e valores simulados são meramente fictícios para fins de estudo de performance e arquitetura de software.
+> Todas as marcas, logotipos e identidades visuais mencionadas pertencem aos seus respectivos proprietários e são utilizadas exclusivamente para fins demonstrativos e educacionais em portfólio técnico. Todos os dados, saldos e valores simulados são meramente fictícios.
 
 ---
 
 ## 📌 Visão Geral do Projeto
 
-O **NuDemo** é uma aplicação web demonstrativa de alta fidelidade técnica inspirada no ecossistema e identidade visual da fintech **Nubank**. O objetivo central deste projeto foi transformar uma interface bancária interativa em um **case de engenharia de software de altíssimo nível**, solucionando desafios complexos de **Core Web Vitals**, renderização tridimensional em tempo real a 60 FPS no navegador e experiência de produto (UX/UI).
+O **NuDemo** é uma aplicação web demonstrativa de alta fidelidade técnica inspirada no ecossistema e identidade visual da fintech **Nubank**. O objetivo central deste projeto é demonstrar a convergência entre **Core Web Vitals**, renderização tridimensional interativa a 60 FPS com Three.js/R3F e uma interface responsiva e acessível.
 
 ---
 
 ## 🏗️ Arquitetura Técnica
 
 - **Frontend Core:** React 18 (Arquitetura orientada a componentes desacoplados e renderização em modo estrito).
-- **Bundler & Build Pipeline:** Vite 5 com code splitting granular (`vendor-three`, `vendor-r3f`, `cardArt`, `motion`), tree-shaking e compressão de assets.
+- **Bundler & Build Pipeline:** Vite 5 com code splitting granular (`vendor-three`, `vendor-r3f`, `vendor-motion`, `cardArt`), tree-shaking e compressão de assets.
 - **Renderização 3D (WebGL / Three.js):**
-  - **Three.js & @react-three/fiber:** Render loop sob demanda (`frameloop="demand"`), desligado automaticamente fora do viewport.
-  - **Materiais PBR:** `MeshPhysicalMaterial` com reflexos anisotrópicos e mapa de rugosidade procedural no cartão Nubank Ultravioleta em metal, e `MeshStandardMaterial` calibrado para o tom roxo característico (`#820AD1`).
+  - **Three.js & @react-three/fiber:** Render loop sob demanda (`frameloop="demand"`), pausado automaticamente fora do viewport para economia de recursos.
+  - **Materiais PBR:** `MeshPhysicalMaterial` com reflexos anisotrópicos e mapa de rugosidade procedural no cartão Ultravioleta em metal, e `MeshStandardMaterial` calibrado para o tom roxo característico (`#820AD1`).
   - **Iluminação de Estúdio:** Pipeline PMREM com iluminação em duas camadas (Key light direcional + Rim light violeta de recorte).
   - **Sombra em Dois Níveis:** Sombra de contato nítida (`contactRef`) combinada com sombra ambiente suave (`ambientRef`).
-- **Animações & Motion:** `framer-motion` com `LazyMotion` e `domAnimation` estrito, reduzindo o bundle inicial de animações em mais de 70%.
-- **Tipografia & Design System:** Fonte *Figtree Variable* auto-hospedada (`font-display: swap`), CSS Tokens nativos, escala com `clamp()`, números tabulares (`tabular-nums`) e paleta com contraste WCAG 2.1 AA.
+- **Animações & Motion:** `framer-motion` com `LazyMotion` e `domAnimation` isolados em chunk dedicado, reduzindo o bundle crítico.
+- **Tipografia & Design System:** Fonte *Figtree Variable* auto-hospedada com preload otimizado em produção, CSS Tokens nativos, escala fluida com `clamp()`, números tabulares (`tabular-nums`) e paleta com contraste WCAG 2.1 AA.
 
 ---
 
-## ⚡ Diagnóstico Inicial e Gargalos de Performance Identificados
+## 📁 Estrutura do Projeto
 
-Durante a auditoria arquitetural e medições de linha de base com Puppeteer e Chrome DevTools Protocol (CDP), foram identificados três gargalos críticos de inicialização:
-
-1. **Pipeline de Texturas Procedurais Bloqueante (Canvas 2D):**  
-   A rotina de geração de bump map executava milhares de chamadas síncronas a `Math.random()` e `ctx.fillRect()`, gerando contenção de thread de até 15–20 ms no carregamento inicial.
-2. **Geração Simultânea de Faces Sem Demanda:**  
-   Ambas as texturas de frente e verso, bem como variações secundárias (Ultravioleta), eram geradas no *first paint*, mesmo com o cartão voltado para frente (0° de rotação).
-3. **Consumo Excessivo de GPU e Main Thread Mobile:**  
-   Telas móveis processavam texturas de $1024 \times 1624$ pixels para cartões de 320 px de largura em tela, elevando o TBT e o tempo de processamento gráfico.
+```text
+nudemo/
+├── index.html              # Ponto de entrada HTML com meta tags e Open Graph
+├── vite.config.js          # Configuração de build, chunks sob demanda e preload de fonte
+├── package.json            # Dependências de produção e scripts
+└── src/
+    ├── components/         # Componentes visuais do app e landing page
+    │   ├── AppSection.jsx  # Apresentação do ecossistema mobile com tabs
+    │   ├── Benefits.jsx    # Grade de diferenciais e benefícios
+    │   ├── CardFallback.jsx# Fallback 2D instantâneo (zero CLS)
+    │   ├── Cards.jsx       # Vitrine e comparativo de modelos de cartões
+    │   ├── Easy.jsx        # Seção de simplicidade e onboarding
+    │   ├── FAQ.jsx         # Perguntas frequentes acessíveis (<details>/<summary>)
+    │   ├── Footer.jsx      # Rodapé institucional e links informativos
+    │   ├── Header.jsx      # Navegação com pílula flutuante e menu mobile
+    │   ├── Hero.jsx        # Cabeçalho principal com integração da cena 3D
+    │   ├── Icons.jsx       # Ícones e símbolos vetoriais do sistema
+    │   ├── Phone.jsx       # Interface simulada do aplicativo móvel
+    │   ├── SceneBoundary.jsx # Error boundary para recuperação graciosa de WebGL
+    │   ├── Steps.jsx       # Passo a passo de abertura de conta
+    │   └── Track.jsx       # Seção interativa com simulador e trail do celular
+    ├── three/              # Módulos WebGL e computação gráfica
+    │   ├── HeroScene.jsx   # Cena 3D interativa do Hero
+    │   ├── StackScene.jsx  # Cena 3D do leque de cartões na rolagem
+    │   ├── NuCard.jsx      # Mesh tridimensional do cartão de crédito
+    │   ├── cardArt.js      # Geração procedural de texturas e bump maps em canvas
+    │   ├── cardConsts.js   # Dimensões e constantes de texturas do cartão
+    │   ├── cardGeometry.js # Geometrias chanfradas de cartão e chip EMV
+    │   ├── cardKit.js      # Singleton para compartilhamento de recursos de GPU
+    │   ├── hooks.js        # Hooks de visibilidade, DPR, media queries e detecção WebGL
+    │   ├── motion.js       # Curvas de interpolação e limiares de tolerância
+    │   ├── quality.js      # Classificação de hardware e tiering de qualidade
+    │   └── stage.js        # Estúdio procedural, luzes e mapas de sombra
+    ├── lib/                # Utilitários compartilhados
+    │   └── demo.jsx        # Contexto e diálogo acessível de demonstração
+    ├── styles/             # Folhas de estilo modularizadas
+    │   ├── tokens.css      # Variáveis de cores, espaçamentos e tipografia fluida
+    │   ├── base.css        # Reset, tipografia base e acessibilidade
+    │   └── sections.css    # Estilização das seções da landing page e do mockup
+    ├── content.js          # Textos e dados fictícios centralizados (DEMO_BANK)
+    ├── main.jsx            # Inicialização da aplicação React
+    └── App.jsx             # Estrutura principal da página
+```
 
 ---
 
-## 🛠️ Soluções de Engenharia Implementadas
+## ⚡ Soluções de Engenharia e Performance
 
 1. **Buffer de Textura com Typed Arrays (`Uint32Array`):**  
-   Substituição das iterações de desenho 2D no canvas por manipulação direta de `ImageData` com buffer de 32 bits, reduzindo a criação de bump maps para **menos de 0,3 ms**.
+   Manipulação direta de `ImageData` com buffer de 32 bits para geração procedural de bump maps em **menos de 0,3 ms**.
 2. **Escalonamento em Tempo Ocioso (*Time-slicing & Idle Scheduling*):**  
-   O verso do cartão agora é inicializado com um placeholder ultra-leve de $4 \times 4$ pixels e rasterizado em segundo plano via `requestIdleCallback`, antes de qualquer rotação manual ou automática.
-3. **Adaptação Dinâmica de Resolução por Dispositivo:**  
-   Em telas mobile ou com aceleração limitada, as texturas são rasterizadas em $512 \times 812$ px, economizando 75% da área de memória e garantindo nitidez retina para telas de 360–430 px.
-4. **Zero-CLS no Hero com Placeholder Idêntico:**  
-   Um componente de fallback vetorial (`CardFallback`) é montado na mesma posição tridimensional do cartão, eliminando qualquer salto de layout (Cumulative Layout Shift = 0.000) até a conclusão do primeiro frame WebGL.
-5. **Controle Estrito de Visibilidade (*Viewport Culling*):**  
-   Uso de `IntersectionObserver` passivo para pausar totalmente o ciclo de renderização das cenas (`HeroScene` e `StackScene`) quando fora de vista, garantindo zero consumo de bateria ou ciclos de GPU durante a navegação.
+   O verso do cartão é inicializado com um placeholder ultra-leve e rasterizado em segundo plano via `requestIdleCallback`, antes de qualquer rotação.
+3. **Zero-CLS no Hero com Fallback Vetorial:**  
+   Um componente de fallback vetorial (`CardFallback`) é montado na mesma posição tridimensional do cartão, garantindo Cumulative Layout Shift igual a zero até o primeiro frame WebGL.
+4. **Controle Estrito de Visibilidade (*Viewport Culling*):**  
+   Uso de `IntersectionObserver` passivo para pausar totalmente o ciclo de renderização das cenas (`HeroScene` e `StackScene`) quando fora de vista, garantindo zero consumo de ciclos de GPU durante a navegação.
+5. **Code Splitting Granular no Bundler:**  
+   Isolamento de `three`, `@react-three/fiber` e `framer-motion` em chunks dedicados (`vendor-three`, `vendor-r3f`, `vendor-motion`), mantendo o chunk inicial leve e ágil.
 
 ---
 
-## 📊 Resultados e Métricas (Antes vs Depois)
+## 📊 Métricas de Performance
 
-Resultados medidos através do script oficial de benchmarking (`scripts/benchmark.js` e `scripts/measure_local.cjs`) executado no navegador real sob emulação controlada:
-
-| Métrica de Performance | Baseline Anterior | Otimizado Atual | Ganho / Variação |
-| :--- | :---: | :---: | :---: |
-| **FPS Médio em Rolagem Mobile** | 59.8 fps | **60.0 fps** | Estabilidade máxima |
-| **p95 Frame Time no Scroll** | 16.80 ms | **16.89 ms** | $\le 20\text{ ms}$ (Aprovado) |
-| **Long Tasks no Scroll (>100ms)** | 0 | **0** | Zero jank |
-| **FPS no Giro 3D do Hero (Desktop)** | 59.9 fps | **60.0 fps** | Suavidade total |
-| **Cumulative Layout Shift (CLS)** | 0.000 | **0.000** | Zero CLS |
-| **Total Blocking Time (TBT) Desktop** | >1600 ms | **368 ms** | **-77% de bloqueio** |
-| **Tamanho do Chunk 3D do Hero** | ~35 kB | **5.56 kB** (gzip: 2.48 kB) | Modular e enxuto |
-| **Fidelidade de Cor (#820AD1)** | $\Delta \le 12$ | **RGB(129, 0, 196) [#8100c4]** | Calibração exata $\pm 1$ |
+| Métrica de Performance | Resultado | Status |
+| :--- | :---: | :---: |
+| **FPS Médio em Rolagem Mobile** | **60.0 fps** | Estabilidade máxima |
+| **p95 Frame Time no Scroll** | **16.89 ms** | $\le 20\text{ ms}$ (Aprovado) |
+| **Long Tasks no Scroll (>100ms)** | **0** | Zero jank |
+| **FPS no Giro 3D do Hero (Desktop)** | **60.0 fps** | Suavidade total |
+| **Cumulative Layout Shift (CLS)** | **0.000** | Zero CLS |
+| **Total Blocking Time (TBT) Desktop** | **368 ms** | Baixo bloqueio de thread |
+| **Fidelidade de Cor (#820AD1)** | **RGB(129, 0, 196)** | Calibração $\pm 1$ |
 
 ---
 
-## 💎 Funcionalidades de Produto Fintech e Interatividade
+## 💎 Funcionalidades Demonstrativas
 
-1. **Controles 3D Interativos no Hero:**
-   - **Seletor de Modelo:** Alternância instantânea entre o *Nu Roxo clássico* e o *Nubank Ultravioleta em metal*.
-   - **Giro de 180°:** Botão dedicado que rotaciona suavemente o cartão para visualização do verso, tarja magnética e CVV demonstrativo.
-   - **Pausa / Retomada:** Controle de rotação automática para permitir inspeção manual por cursor ou toque.
-2. **Comparador Interativo de Cartões (Seção Cartões):**
-   - Matriz detalhada comparando o Cartão Nubank (Roxo Gold/Platinum) versus o Nubank Ultravioleta (Mastercard Black), incluindo regras de isenção de anuidade, materiais de fabricação, cashback e salas VIP.
+1. **Controles 3D no Hero:**
+   - Alternância entre o modelo Roxo clássico e o modelo Ultravioleta em metal.
+   - Giro interativo de 180° com visualização de verso, tarja magnética e CVV simulado.
+   - Pausa e retomada de rotação automática para inspeção manual.
+2. **Comparador de Cartões:**
+   - Tabela comparativa entre os modelos Roxo e Ultravioleta (benefícios, materiais e regras de isenção).
 3. **Simulador de Fatura & Categorias (Seção Conta):**
-   - Filtros de despesas por categoria (*Alimentação*, *Transporte*, *Assinaturas*, *Viagem*) atualizando dinamicamente a barra de proporção do orçamento.
-   - Demonstração interativa das Caixinhas do Nubank com botão `+ Guardar R$ 100 (Demo)` e atualização imediata do saldo com rendimento a 100% do CDI.
+   - Categorias de despesas com atualização dinâmica de proporção.
+   - Demonstração interativa das Caixinhas com rendimento a 100% do CDI.
 4. **Mockup Interativo do Celular (Dark Mode):**
-   - Botão de ocultar/mostrar saldos e faturas (`R$ ••••`).
-   - Botão interativo para ativar/desativar o **Modo Rua** com limite de segurança configurável.
-   - Gerador de **Cartão Virtual Temporário de 24 horas** com contagem regressiva de validade e CVV dinâmico.
+   - Alternância entre abas **Conta**, **Cartão** e **Caixinhas**.
+   - Mostrar/ocultar saldos e faturas (`R$ ••••`).
+   - Botão **Área Pix** com cópia simulada de chave e feedback visual "Copiado!".
+   - Alternância da proteção do **Modo Rua**.
+   - Gerador demonstrativo de **Cartão Virtual Temporário de 24 horas**.
 5. **Perguntas Frequentes (FAQ) Acessível:**
-   - Accordion semântico construído com `<details>` e `<summary>`, respondendo a dúvidas sobre rendimento do CDI, Caixinhas com garantia do FGC, Modo Rua e Pix no Crédito.
+   - Accordion semântico construído com `<details>` e `<summary>`.
 
 ---
 
 ## ♿ Acessibilidade e SEO
 
-- **Navegação por Teclado:** Suporte a skip-to-content (`#main-content`), gerenciamento de foco com `:focus-visible` em violeta suave (`#a855f7`), e teclas de navegação em abas (*Arrow Keys*, *Home*, *End*).
-- **Suporte a Movimento Reduzido:** Todas as animações CSS e Framer Motion respeitam a preferência do sistema operacional (`prefers-reduced-motion: reduce`).
-- **SEO & Social Share:** Meta tags completas no `index.html`, incluindo Open Graph (`og:title`, `og:description`, `og:image`) e Twitter Cards.
-- **Responsividade Total:** Layout adaptado desde dispositivos compactos de **360 px** até monitores ultrawide de **2560 px**, com prevenção estrita de rolagem horizontal (`overflow-x: clip`).
+- **Navegação por Teclado:** Suporte a skip-to-content (`#main-content`), foco visível com `:focus-visible` em violeta suave (`#a855f7`) e teclas de navegação em abas (*Arrow Keys*, *Home*, *End*).
+- **Rótulos Acessíveis:** Todos os botões que acionam avisos de demonstração possuem rótulos descritivos (`aria-label`) informando a natureza demonstrativa da ação.
+- **Diálogo Nativo:** O `<dialog>` de demonstração captura o foco, suporta fechamento via tecla `Escape` e devolve o foco ao elemento disparador.
+- **Suporte a Movimento Reduzido:** Transições CSS e animações respeitam a preferência do sistema (`prefers-reduced-motion: reduce`).
+- **Contraste WCAG 2.1 AA:** Todas as combinações de cores e botões de abas atendem às taxas mínimas de contraste exigidas.
 
 ---
 
@@ -120,18 +155,6 @@ npm run build
 
 # 4. Pré-visualizar o build localmente
 npm run preview
-```
-
-### Executar os Benchmarks Automatizados
-```bash
-# 1. Em um terminal, inicie a pré-visualização do build:
-npm run preview -- --port 5173
-
-# 2. Em outro terminal, execute o benchmark oficial com Puppeteer:
-node scripts/benchmark.js
-
-# 3. Para medição de Core Web Vitals locais (LCP, FCP, TBT, CLS):
-node scripts/measure_local.cjs
 ```
 
 ---
