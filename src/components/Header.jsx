@@ -55,10 +55,10 @@ export default function Header() {
         </ul>
 
         <div className="pill-actions">
-          <button type="button" className="pill-text" onClick={() => demo('Acessar conta', 'O acesso à conta não existe neste site demonstrativo.')}>
+          <button type="button" className="pill-text" aria-label="Acessar conta (Demonstração)" onClick={() => demo('Acessar conta', 'O acesso à conta não existe neste site demonstrativo.')}>
             Acessar
           </button>
-          <button type="button" className="btn btn-dark btn-sm" onClick={() => demo()}>
+          <button type="button" className="btn btn-dark btn-sm" aria-label="Abrir conta (Demonstração)" onClick={() => demo()}>
             Abrir conta
           </button>
           <button
@@ -95,6 +95,7 @@ export default function Header() {
           <button
             type="button"
             className="btn btn-primary"
+            aria-label="Abrir conta (Demonstração)"
             onClick={() => {
               setOpen(false)
               demo('Abrir conta', 'Demonstração de abertura de conta digital.')

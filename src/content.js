@@ -1,5 +1,61 @@
-// Conteúdo oficial calibrado com o ecossistema e identidade da fintech Nubank.
+// Conteúdo demonstrativo calibrado com o ecossistema fintech Nubank.
 // Valores e nomes são demonstrativos para fins de portfólio de engenharia de software.
+
+export const DEMO_BANK = {
+  user: {
+    greeting: 'Olá, Gabriela',
+    avatarLabel: 'Perfil de Gabriela',
+  },
+  account: {
+    balance: 'R$ 1.518,38',
+    balanceHidden: '••••••••',
+    cdiTag: 'Rendimento automático 100% do CDI',
+    pixKey: 'chave.demo@exemplo.com',
+  },
+  card: {
+    invoice: 'R$ 16,44',
+    invoiceSublabel: 'Fatura atual fecha em 7 dias',
+    availableLimit: 'R$ 983,56',
+    totalLimit: 'R$ 1.000,00',
+    limitPct: '4%',
+    limitNote: 'Limite disponível de R$ 983,56',
+    virtualCard: {
+      number: '•••• •••• •••• 4821',
+      validity: '23h 59m',
+      cvv: '382',
+      cvvHidden: '•••',
+    },
+    transactions: [
+      {
+        id: 'tx-1',
+        title: 'Supermercado Pão de Mel',
+        meta: 'Hoje, 14:22 • Cartão físico',
+        amount: 'R$ 12,50',
+      },
+      {
+        id: 'tx-2',
+        title: 'Padaria Central',
+        meta: 'Ontem, 08:45 • Por aproximação',
+        amount: 'R$ 3,94',
+      },
+    ],
+  },
+  loan: {
+    available: 'R$ 50.000,00',
+    badge: 'R$ 50.000',
+  },
+  caixinhas: {
+    defaultBalance: 5240,
+    yieldNote: '+R$ 48,20 de rendimento este mês',
+    vacationBalance: 1740,
+    vacationBalanceFormatted: 'R$ 1.740,00',
+  },
+  modoRua: {
+    limitFormatted: 'R$ 500',
+    activeText: 'Modo Rua Ativo (Limite R$ 500)',
+    inactiveText: 'Modo Rua: Toque para ativar',
+  },
+}
 
 export const NAV = [
   { id: 'conta', label: 'Conta' },

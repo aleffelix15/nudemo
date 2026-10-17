@@ -56,7 +56,7 @@ export function useCardImage(variant = 0, width = 560) {
   return src
 }
 
-// Cartão Nubank 2D em CSS/SVG puro (fiel à referência física oficial e à cena 3D)
+// Cartão Nubank 2D em CSS/SVG puro (ilustração estilizada alinhada à cena 3D)
 export function SvgNuCard({
   variant = 'roxinho',
   name = HOLDER_NAME,

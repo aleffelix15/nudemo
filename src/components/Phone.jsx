@@ -1,13 +1,14 @@
 import { useState, useRef, useEffect } from 'react'
 import Icon from './Icons'
+import { DEMO_BANK } from '../content'
 
-// Chassis de alta precisão em titânio escuro (#1E1E24) e interface nativa 100% vetorial do Nubank em Dark Mode
+// Chassis em titânio escuro (#1E1E24) e interface nativa 100% vetorial do Nubank em Dark Mode
 export default function Phone({
   activeTab = 'conta', // 'conta' | 'cartao' | 'caixinhas'
   onTabChange,
   className = '',
   alt = 'Interface do aplicativo Nubank',
-  caixinhasBalance = 5240,
+  caixinhasBalance = DEMO_BANK.caixinhas.defaultBalance,
 }) {
   const [showBalance, setShowBalance] = useState(true)
   const [copiedPix, setCopiedPix] = useState(false)
@@ -26,7 +27,7 @@ export default function Phone({
   const handlePixClick = async () => {
     try {
       if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText('chave.demo@exemplo.com')
+        await navigator.clipboard.writeText(DEMO_BANK.account.pixKey)
       }
     } catch {
       // Ignora erro de permissão caso negado pelo navegador
@@ -63,10 +64,10 @@ export default function Phone({
           {/* Cabeçalho Roxo Autêntico (#530082) */}
           <div className="nu-app-header">
             <div className="nu-user-profile">
-              <div className="nu-avatar-circle" aria-label="Perfil de Gabriela">
+              <div className="nu-avatar-circle" aria-label={DEMO_BANK.user.avatarLabel}>
                 <Icon name="user" size={17} />
               </div>
-              <span className="nu-greeting">Olá, Gabriela</span>
+              <span className="nu-greeting">{DEMO_BANK.user.greeting}</span>
             </div>
             <div className="nu-header-actions">
               <button
@@ -100,7 +101,7 @@ export default function Phone({
                 <Icon name="shield" size={13} />
               </div>
               <div className="nu-modorua-info">
-                <span>{modoRuaActive ? 'Modo Rua Ativo (Limite R$ 500)' : 'Modo Rua: Toque para ativar'}</span>
+                <span>{modoRuaActive ? DEMO_BANK.modoRua.activeText : DEMO_BANK.modoRua.inactiveText}</span>
               </div>
               <span className="nu-modorua-switch" aria-hidden="true" />
             </button>
@@ -117,9 +118,9 @@ export default function Phone({
                     <Icon name="chevron" size={14} className="nu-chevron" />
                   </div>
                   <div className="nu-balance-val tabular-nums">
-                    {showBalance ? 'R$ 1.518,38' : '••••••••'}
+                    {showBalance ? DEMO_BANK.account.balance : DEMO_BANK.account.balanceHidden}
                   </div>
-                  <span className="nu-cdi-tag">Rendimento automático 100% do CDI</span>
+                  <span className="nu-cdi-tag">{DEMO_BANK.account.cdiTag}</span>
                 </div>
 
                 {/* Carrossel de Ações Rápidas (círculos #18181E, 48px) */}
@@ -142,7 +143,7 @@ export default function Phone({
                     <span>Pagar</span>
                   </div>
                   <div className="nu-shortcut has-badge">
-                    <div className="nu-badge-pill">R$ 50.000</div>
+                    <div className="nu-badge-pill">{DEMO_BANK.loan.badge}</div>
                     <div className="nu-shortcut-circle">
                       <Icon name="loan" size={20} />
                     </div>
@@ -189,9 +190,9 @@ export default function Phone({
                   </div>
                   <span className="nu-sublabel">Fatura atual</span>
                   <div className="nu-invoice-val tabular-nums">
-                    {showBalance ? 'R$ 16,44' : '••••••••'}
+                    {showBalance ? DEMO_BANK.card.invoice : DEMO_BANK.account.balanceHidden}
                   </div>
-                  <span className="nu-limit-note tabular-nums">Limite disponível de R$ 983,56</span>
+                  <span className="nu-limit-note tabular-nums">{DEMO_BANK.card.limitNote}</span>
                 </div>
 
                 {/* Bloco Empréstimo */}
@@ -202,7 +203,7 @@ export default function Phone({
                   </div>
                   <span className="nu-sublabel">Valor disponível de até</span>
                   <div className="nu-loan-val tabular-nums">
-                    {showBalance ? 'R$ 50.000,00' : '••••••••'}
+                    {showBalance ? DEMO_BANK.loan.available : DEMO_BANK.account.balanceHidden}
                   </div>
                 </div>
               </>
@@ -216,17 +217,17 @@ export default function Phone({
                     <span>Cartão de crédito</span>
                     <Icon name="chevron" size={14} className="nu-chevron" />
                   </div>
-                  <span className="nu-sublabel">Fatura atual fecha em 7 dias</span>
+                  <span className="nu-sublabel">{DEMO_BANK.card.invoiceSublabel}</span>
                   <div className="nu-invoice-val tabular-nums is-large">
-                    {showBalance ? 'R$ 16,44' : '••••••••'}
+                    {showBalance ? DEMO_BANK.card.invoice : DEMO_BANK.account.balanceHidden}
                   </div>
                   <div className="nu-limit-bar-wrap">
                     <div className="nu-limit-bar">
-                      <div className="nu-limit-fill" style={{ width: '4%' }} />
+                      <div className="nu-limit-fill" style={{ width: DEMO_BANK.card.limitPct }} />
                     </div>
                     <div className="nu-limit-details">
-                      <span>Limite disponível: <b>{showBalance ? 'R$ 983,56' : '••••'}</b></span>
-                      <span>Total: R$ 1.000,00</span>
+                      <span>Limite disponível: <b>{showBalance ? DEMO_BANK.card.availableLimit : '••••'}</b></span>
+                      <span>Total: {DEMO_BANK.card.totalLimit}</span>
                     </div>
                   </div>
                 </div>
@@ -245,10 +246,10 @@ export default function Phone({
                         ×
                       </button>
                     </div>
-                    <div className="nu-virtual-number">•••• •••• •••• 4821</div>
+                    <div className="nu-virtual-number">{DEMO_BANK.card.virtualCard.number}</div>
                     <div className="nu-virtual-row">
-                      <span>Validade: <b>23h 59m</b></span>
-                      <span>CVV: <b>{showBalance ? '382' : '•••'}</b></span>
+                      <span>Validade: <b>{DEMO_BANK.card.virtualCard.validity}</b></span>
+                      <span>CVV: <b>{showBalance ? DEMO_BANK.card.virtualCard.cvv : DEMO_BANK.card.virtualCard.cvvHidden}</b></span>
                     </div>
                     <small className="nu-virtual-note">Exclusão automática em 24h para compras seguras</small>
                   </div>
@@ -281,20 +282,15 @@ export default function Phone({
                 {/* Últimas Compras */}
                 <div className="nu-transactions-box">
                   <span className="nu-sublabel-head">Últimas transações</span>
-                  <div className="nu-tx-row">
-                    <div className="nu-tx-info">
-                      <b>Supermercado Pão de Mel</b>
-                      <small>Hoje, 14:22 • Cartão físico</small>
+                  {DEMO_BANK.card.transactions.map((tx) => (
+                    <div className="nu-tx-row" key={tx.id}>
+                      <div className="nu-tx-info">
+                        <b>{tx.title}</b>
+                        <small>{tx.meta}</small>
+                      </div>
+                      <span className="nu-tx-price tabular-nums">{showBalance ? tx.amount : '••••'}</span>
                     </div>
-                    <span className="nu-tx-price tabular-nums">{showBalance ? 'R$ 12,50' : '••••'}</span>
-                  </div>
-                  <div className="nu-tx-row">
-                    <div className="nu-tx-info">
-                      <b>Padaria Central</b>
-                      <small>Ontem, 08:45 • Por aproximação</small>
-                    </div>
-                    <span className="nu-tx-price tabular-nums">{showBalance ? 'R$ 3,94' : '••••'}</span>
-                  </div>
+                  ))}
                 </div>
               </>
             )}
@@ -311,7 +307,7 @@ export default function Phone({
                   <div className="nu-balance-val tabular-nums">
                     {showBalance ? `R$ ${Number(caixinhasBalance).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '••••••••'}
                   </div>
-                  <span className="nu-cdi-badge">+R$ 48,20 de rendimento este mês</span>
+                  <span className="nu-cdi-badge">{DEMO_BANK.caixinhas.yieldNote}</span>
                 </div>
 
                 {/* Lista de Caixinhas */}
@@ -327,7 +323,7 @@ export default function Phone({
                       </div>
                     </div>
                     <div className="nu-box-val tabular-nums">
-                      {showBalance ? `R$ ${Number(Math.max(0, caixinhasBalance - 1740)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '••••••••'}
+                      {showBalance ? `R$ ${Number(Math.max(0, caixinhasBalance - DEMO_BANK.caixinhas.vacationBalance)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '••••••••'}
                     </div>
                   </div>
 
@@ -342,7 +338,7 @@ export default function Phone({
                       </div>
                     </div>
                     <div className="nu-box-val tabular-nums">
-                      {showBalance ? 'R$ 1.740,00' : '••••••••'}
+                      {showBalance ? DEMO_BANK.caixinhas.vacationBalanceFormatted : '••••••••'}
                     </div>
                   </div>
 

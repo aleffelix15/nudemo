@@ -106,7 +106,7 @@ export default function AppSection() {
               key={s.name}
               type="button"
               className="store"
-              aria-label={`Baixar na loja ${s.name}`}
+              aria-label={`Ver demonstração de download na loja ${s.name}`}
               onClick={() =>
                 demo(`${s.name}`, 'Este é um site demonstrativo. O app não está disponível para download aqui.')
               }

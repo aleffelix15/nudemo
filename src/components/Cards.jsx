@@ -139,6 +139,7 @@ export default function Cards() {
             <button
               type="button"
               className="btn btn-primary btn-sm"
+              aria-label={`Pedir ${c.name} (Demonstração)`}
               onClick={() => demo(`${CARDS.action}: ${c.name}`, `Demonstração de solicitação do ${c.name}. Nenhum dado real é solicitado.`)}
             >
               {CARDS.action}

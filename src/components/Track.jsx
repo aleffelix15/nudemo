@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { m, useScroll, useTransform } from 'framer-motion'
-import { TRACK } from '../content'
+import { TRACK, DEMO_BANK } from '../content'
 import Phone from './Phone'
 import { useDemo } from '../lib/demo'
 import { useReducedMotionMQ, useIsMobile } from '../three/hooks'
@@ -35,7 +35,7 @@ export default function Track() {
   const reduced = useReducedMotionMQ()
   const mobile = useIsMobile()
   const [activeCat, setActiveCat] = useState(0)
-  const [caixinhasBalance, setCaixinhasBalance] = useState(5240)
+  const [caixinhasBalance, setCaixinhasBalance] = useState(DEMO_BANK.caixinhas.defaultBalance)
   const [justSaved, setJustSaved] = useState(false)
   const savedTimer = useRef(null)
 
@@ -194,6 +194,7 @@ export default function Track() {
         <button
           type="button"
           className="btn btn-primary track-cta"
+          aria-label="Abrir conta digital (Demonstração)"
           onClick={() => demo('Abrir conta digital', 'Demonstração de abertura de conta digital com rendimento de 100% do CDI.')}
         >
           {TRACK.action}

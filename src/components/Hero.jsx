@@ -109,7 +109,7 @@ export default function Hero() {
           <button
             type="button"
             className="btn btn-primary"
-            aria-label="Abrir conta digital no Nubank"
+            aria-label="Abrir conta digital (Demonstração)"
             onClick={() => demo('Abrir conta digital', 'Demonstração de abertura de conta digital com rendimento de 100% do CDI.')}
           >
             {HERO.primary}
