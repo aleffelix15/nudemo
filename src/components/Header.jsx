@@ -31,8 +31,9 @@ export default function Header() {
   return (
     <header className="header">
       <nav className="pill" aria-label="Principal">
-        <a href="#topo" className="pill-logo" aria-label="Início">
+        <a href="#topo" className="pill-logo" aria-label="Início do projeto demonstrativo NuDemo">
           <NuLogo size={30} color="var(--nu)" />
+          <span className="header-demo-tag" title="Demonstração independente de engenharia">Demo</span>
         </a>
 
         <ul className="pill-links">

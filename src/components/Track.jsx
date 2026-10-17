@@ -35,17 +35,35 @@ export default function Track() {
   const reduced = useReducedMotionMQ()
   const mobile = useIsMobile()
   const [activeCat, setActiveCat] = useState(0)
+  const [caixinhasBalance, setCaixinhasBalance] = useState(5240)
+  const [justSaved, setJustSaved] = useState(false)
+  const savedTimer = useRef(null)
+
+  const categories = TRACK.categories || [
+    { id: 'todas', label: 'Todas as despesas', total: 'R$ 1.842,50', pct: 100 },
+    { id: 'alimentacao', label: 'Alimentação', total: 'R$ 720,30', pct: 39 },
+    { id: 'transporte', label: 'Transporte', total: 'R$ 380,00', pct: 21 },
+    { id: 'assinaturas', label: 'Assinaturas', total: 'R$ 142,20', pct: 8 },
+    { id: 'viagem', label: 'Viagem', total: 'R$ 600,00', pct: 32 },
+  ]
+
+  const handleSaveMoney = () => {
+    setCaixinhasBalance((b) => b + 100)
+    setJustSaved(true)
+    if (savedTimer.current) clearTimeout(savedTimer.current)
+    savedTimer.current = setTimeout(() => setJustSaved(false), 2400)
+  }
 
   const handleCatKeyDown = (e, i) => {
     let nextIndex = null
     if (e.key === 'ArrowRight') {
-      nextIndex = (i + 1) % CATEGORIES.length
+      nextIndex = (i + 1) % categories.length
     } else if (e.key === 'ArrowLeft') {
-      nextIndex = (i - 1 + CATEGORIES.length) % CATEGORIES.length
+      nextIndex = (i - 1 + categories.length) % categories.length
     } else if (e.key === 'Home') {
       nextIndex = 0
     } else if (e.key === 'End') {
-      nextIndex = CATEGORIES.length - 1
+      nextIndex = categories.length - 1
     }
     if (nextIndex !== null) {
       e.preventDefault()
@@ -58,9 +76,11 @@ export default function Track() {
   const rotate = useTransform(scrollYProgress, [0, 1], [mobile ? 2 : 6, mobile ? -3 : -8])
   const lift = useTransform(scrollYProgress, [0, 1], [mobile ? 10 : 30, mobile ? -10 : -30])
 
+  const currentCat = categories[activeCat] || categories[0]
+
   return (
     <section className="track" id="conta" ref={ref} aria-label="Acompanhe sua conta Nubank">
-      {/* Cabeçalho da seção: renderizado no topo em mobile e alinhado à direita no desktop */}
+      {/* Cabeçalho da seção */}
       <div className="track-head">
         <h2>
           {TRACK.title[0]}
@@ -70,53 +90,58 @@ export default function Track() {
         <p className="lead">{TRACK.lead}</p>
       </div>
 
-      {/* Dispositivo com rastro interativo perfeitamente enquadrado */}
+      {/* Dispositivo com rastro interativo */}
       <div className="track-device">
         <m.div className="track-phone" style={reduced ? { rotate: -2 } : { rotate, y: lift }}>
           <Trail progress={scrollYProgress} reduced={reduced} mobile={mobile} />
           <Phone
-            activeTab={activeCat === 2 ? 'cartao' : activeCat === 3 ? 'caixinhas' : 'conta'}
+            activeTab={activeCat === 0 ? 'conta' : activeCat === 3 ? 'cartao' : 'caixinhas'}
             onTabChange={(tab) => {
-              if (tab === 'cartao') setActiveCat(2)
-              else if (tab === 'caixinhas') setActiveCat(3)
+              if (tab === 'cartao') setActiveCat(3)
+              else if (tab === 'caixinhas') setActiveCat(4)
               else setActiveCat(0)
             }}
+            caixinhasBalance={caixinhasBalance}
             alt="Tela inicial do aplicativo Nubank em Modo Escuro"
           />
         </m.div>
       </div>
 
-      {/* Bloco de estatísticas, categorias e benefícios */}
+      {/* Bloco de estatísticas, categorias e simulador de Caixinhas */}
       <div className="track-body">
         {/* Barra de progresso e estatísticas em tempo real com números tabulares */}
         <div className="track-stat-card" role="region" aria-label="Controle financeiro em tempo real">
           <div className="track-stat-row">
             <div>
-              <span className="track-stat-sub">Saldo disponível na conta</span>
-              <div className="track-stat-val tabular-nums">R$ 1.518,38</div>
+              <span className="track-stat-sub">{currentCat.label}</span>
+              <div className="track-stat-val tabular-nums">{currentCat.total}</div>
             </div>
-            <span className="track-stat-badge">Ao vivo</span>
+            <span className="track-stat-badge">Simulador</span>
           </div>
           <div className="track-progress-bar" aria-hidden="true">
-            <div className="track-progress-fill" style={{ width: '65%' }} />
+            <m.div
+              className="track-progress-fill"
+              animate={{ width: `${currentCat.pct}%` }}
+              transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+            />
           </div>
           <div className="track-stat-grid">
             <div className="track-stat-cell">
-              <span>Fatura do cartão</span>
-              <b className="tabular-nums">R$ 16,44</b>
+              <span>Fatura estimada</span>
+              <b className="tabular-nums">R$ 1.842,50</b>
             </div>
             <div className="track-stat-cell">
-              <span>Limite disponível</span>
-              <b className="tabular-nums">R$ 983,56</b>
+              <span>Proporção do mês</span>
+              <b className="tabular-nums">{currentCat.pct}%</b>
             </div>
           </div>
         </div>
 
         {/* Filtros e botões de categoria com touch targets mínimos de 44x44px */}
-        <div className="track-categories" role="tablist" aria-label="Categorias de controle">
-          {CATEGORIES.map((cat, i) => (
+        <div className="track-categories" role="tablist" aria-label="Categorias de despesas">
+          {categories.map((cat, i) => (
             <button
-              key={cat}
+              key={cat.id}
               id={`track-tab-${i}`}
               type="button"
               role="tab"
@@ -127,13 +152,38 @@ export default function Track() {
               onClick={() => setActiveCat(i)}
               onKeyDown={(e) => handleCatKeyDown(e, i)}
             >
-              {cat}
+              {cat.label}
             </button>
           ))}
         </div>
         <span className="sr-only" aria-live="polite">
-          Categoria selecionada: {CATEGORIES[activeCat]}
+          Categoria selecionada: {currentCat.label}
         </span>
+
+        {/* Demonstração interativa das Caixinhas do Nubank */}
+        <div className="track-caixinhas-box" role="region" aria-label="Demonstração interativa das Caixinhas">
+          <div className="track-caixinhas-row">
+            <div>
+              <span className="track-caixinhas-title">Caixinhas Nubank (100% do CDI)</span>
+              <div className="track-caixinhas-val tabular-nums">
+                R$ {caixinhasBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </div>
+            </div>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm track-save-btn"
+              onClick={handleSaveMoney}
+              title="Guardar mais R$ 100 de demonstração"
+            >
+              + Guardar R$ 100 (Demo)
+            </button>
+          </div>
+          {justSaved && (
+            <div className="track-saved-toast" role="status">
+              ✓ +R$ 100 adicionado à Reserva de Emergência!
+            </div>
+          )}
+        </div>
 
         <ul className="ticks" role="list">
           {TRACK.items.map((t) => (
@@ -144,7 +194,7 @@ export default function Track() {
         <button
           type="button"
           className="btn btn-primary track-cta"
-          onClick={() => demo('Abrir conta', 'Demonstração de abertura de conta digital.')}
+          onClick={() => demo('Abrir conta digital', 'Demonstração de abertura de conta digital com rendimento de 100% do CDI.')}
         >
           {TRACK.action}
         </button>

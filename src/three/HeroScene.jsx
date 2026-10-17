@@ -32,7 +32,7 @@ function TwoTierShadow({ contactRef, ambientRef }) {
   )
 }
 
-function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile }) {
+function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile, manualVariant, isPaused, isFlipped }) {
   const gl = useThree((s) => s.gl)
   const scene = useThree((s) => s.scene)
   const camera = useThree((s) => s.camera)
@@ -65,21 +65,13 @@ function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile
     }
   }, [gl, scene, camera, invalidate])
 
-  // Desperta a renderização quando running passa para true
-  useEffect(() => {
-    if (running) {
-      st.current.lastNow = performance.now() // o tempo fora da tela não conta
-      invalidate()
-    }
-  }, [running, invalidate])
-
   const card = useRef()
   const rig = useRef()
   const contactShadow = useRef()
   const ambientShadow = useRef()
   const isSleeping = useRef(false)
   const dwellTimer = useRef(null)
-  const st = useRef({ t: 0, variant: 0, px: 0, py: 0, tx: 0, ty: 0, scroll: 0, lastNow: performance.now() })
+  const st = useRef({ t: 0, variant: 0, px: 0, py: 0, tx: 0, ty: 0, scroll: 0, flipAngle: 0, lastNow: performance.now() })
 
   const runningRef = useRef(running)
   runningRef.current = running
@@ -89,6 +81,26 @@ function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile
     isSleeping.current = false
     invalidate()
   }
+
+  // Desperta a renderização quando running passa para true
+  useEffect(() => {
+    if (running) {
+      st.current.lastNow = performance.now() // o tempo fora da tela não conta
+      invalidate()
+    }
+  }, [running, invalidate])
+
+  // Responde imediatamente aos controles interativos manuais
+  useEffect(() => {
+    wakeUp()
+    if (manualVariant !== null && manualVariant !== undefined) {
+      st.current.variant = manualVariant
+      card.current?.setVariant(manualVariant)
+    }
+    if (isFlipped) {
+      card.current?.ensureBack?.()
+    }
+  }, [manualVariant, isPaused, isFlipped])
 
   useEffect(() => {
     window.addEventListener('scroll', wakeUp, { passive: true })
@@ -122,9 +134,8 @@ function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile
 
     const s = st.current
     const now = performance.now()
-    // Relógio real: o limite só protege contra aba oculta. Um limite de 0,1 s fazia o
-    // repouso durar vários segundos, pois o loop dorme e acorda por timer.
-    const realDt = Math.min((now - s.lastNow) / 1000, 1.5)
+    // Relógio real: o limite só protege contra aba oculta. Pausa trava o relógio de rotação.
+    const realDt = isPaused ? 0 : Math.min((now - s.lastNow) / 1000, 1.5)
     s.lastNow = now
 
     const dt = Math.min(rawDt, 0.05)
@@ -154,30 +165,39 @@ function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile
     const cycle = Math.floor(s.t / period)
     const phase = s.t - cycle * period
     let u = 0
-    if (phase > HERO.dwell) {
-      u = (phase - HERO.dwell) / HERO.spin
-      if (dwellTimer.current) {
-        clearTimeout(dwellTimer.current)
-        dwellTimer.current = null
-      }
-    } else {
-      // Agenda despertar no término do repouso para iniciar o giro autonomamente
-      if (!dwellTimer.current) {
-        const remainingDwell = Math.max(16, (HERO.dwell - phase) * 1000)
-        dwellTimer.current = setTimeout(() => {
+    if (!isPaused) {
+      if (phase > HERO.dwell) {
+        u = (phase - HERO.dwell) / HERO.spin
+        if (dwellTimer.current) {
+          clearTimeout(dwellTimer.current)
           dwellTimer.current = null
-          wakeUp()
-        }, remainingDwell)
+        }
+      } else {
+        // Agenda despertar no término do repouso para iniciar o giro autonomamente
+        if (!dwellTimer.current) {
+          const remainingDwell = Math.max(16, (HERO.dwell - phase) * 1000)
+          dwellTimer.current = setTimeout(() => {
+            dwellTimer.current = null
+            wakeUp()
+          }, remainingDwell)
+        }
       }
     }
 
-    const angle = Math.PI * 2 * easeInOutCubic(u)
-    const variant = (cycle + (u >= HERO.swapAt ? 1 : 0)) % VARIANTS.length
+    const angle = isPaused ? 0 : Math.PI * 2 * easeInOutCubic(u)
+    const variant = manualVariant !== null && manualVariant !== undefined
+      ? manualVariant
+      : (cycle + (u >= HERO.swapAt ? 1 : 0)) % VARIANTS.length
 
     if (variant !== s.variant) {
       s.variant = variant
       card.current?.setVariant(variant)
     }
+
+    // Suavização do giro de 180°
+    const targetFlip = isFlipped ? Math.PI : 0
+    const prevFlip = s.flipAngle
+    s.flipAngle = THREE.MathUtils.damp(s.flipAngle, targetFlip, 6, dt)
 
     const prevPx = s.px
     const prevPy = s.py
@@ -190,7 +210,7 @@ function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile
     s.scroll = THREE.MathUtils.damp(s.scroll, targetScroll, 4, dt)
 
     const rotX = HERO.basePitch + s.py * HERO.pointerPitch
-    const rotY = HERO.baseYaw + angle + s.scroll * HERO.scrollYaw + s.px * HERO.pointerYaw
+    const rotY = HERO.baseYaw + angle + s.flipAngle + s.scroll * HERO.scrollYaw + s.px * HERO.pointerYaw
     const rotZ = HERO.tilt
 
     g.rotation.set(rotX, rotY, rotZ)
@@ -207,9 +227,10 @@ function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile
     const delta =
       Math.abs(s.px - prevPx) +
       Math.abs(s.py - prevPy) +
+      Math.abs(s.flipAngle - prevFlip) +
       Math.abs(s.scroll - prevScroll) * HERO.scrollYaw
 
-    if (delta >= EPSILON || phase > HERO.dwell || u > 0) {
+    if (delta >= EPSILON || (!isPaused && (phase > HERO.dwell || u > 0))) {
       invalidate()
     } else {
       isSleeping.current = true
@@ -231,7 +252,15 @@ function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile
   )
 }
 
-export default function HeroScene({ reduced, interactive, running, onReady }) {
+export default function HeroScene({
+  reduced,
+  interactive,
+  running,
+  onReady,
+  manualVariant = null,
+  isPaused = false,
+  isFlipped = false,
+}) {
   const isMobile = useIsMobile()
   const isSmallMobile = useIsSmallMobile()
   const isCoarse = useIsCoarsePointer()
@@ -299,6 +328,9 @@ export default function HeroScene({ reduced, interactive, running, onReady }) {
           onReady={onReady}
           isMobile={isMobile}
           isSmallMobile={isSmallMobile}
+          manualVariant={manualVariant}
+          isPaused={isPaused}
+          isFlipped={isFlipped}
         />
       </Canvas>
     </>

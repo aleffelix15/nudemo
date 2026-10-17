@@ -86,6 +86,7 @@ export default function Cards() {
   const reduced = useReducedMotionMQ()
   const fonts = useFontsReady()
   const [gl] = useState(() => hasWebGL())
+  const [showComparison, setShowComparison] = useState(false)
   const stageRef = useRef(null)
   const isNear = useNearViewport(stageRef, '350px')
   const isVisible = useCanvasVisibility(stageRef, '250px 0px')
@@ -123,6 +124,10 @@ export default function Cards() {
             viewport={{ once: true, margin: '-12% 0px' }}
             transition={{ duration: 0.8, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] }}
           >
+            <div className="card-header-meta">
+              <span className={`card-badge ${c.variant === 1 ? 'is-metal' : 'is-purple'}`}>{c.badge}</span>
+              <span className="card-tier">{c.tier}</span>
+            </div>
             <TiltCard variant={c.variant} name={c.name} />
             <h3>{c.name}</h3>
             <p>{c.text}</p>
@@ -134,13 +139,14 @@ export default function Cards() {
             <button
               type="button"
               className="btn btn-primary btn-sm"
-              onClick={() => demo(`${CARDS.action}: ${c.name}`, 'Este é um site demonstrativo. Nenhum cartão é solicitado.')}
+              onClick={() => demo(`${CARDS.action}: ${c.name}`, `Demonstração de solicitação do ${c.name}. Nenhum dado real é solicitado.`)}
             >
               {CARDS.action}
             </button>
           </m.li>
         ))}
       </ul>
+
       <div className="cards-help">
         <p>
           <b>{CARDS.helpTitle}</b> {CARDS.helpText}
@@ -148,11 +154,46 @@ export default function Cards() {
         <button
           type="button"
           className="btn btn-ghost btn-sm"
-          onClick={() => demo('Comparar cartões', 'A comparação detalhada não existe neste site demonstrativo.')}
+          aria-expanded={showComparison}
+          aria-controls="cards-comparison-matrix"
+          onClick={() => setShowComparison((s) => !s)}
         >
-          {CARDS.helpAction}
+          {showComparison ? 'Ocultar tabela comparativa' : CARDS.helpAction}
         </button>
       </div>
+
+      {showComparison && (
+        <m.div
+          id="cards-comparison-matrix"
+          className="cards-comparison-wrap"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          role="region"
+          aria-label="Tabela comparativa detalhada dos cartões Nubank"
+        >
+          <div className="comparison-table-container">
+            <table className="comparison-table">
+              <thead>
+                <tr>
+                  <th scope="col">Benefício / Recurso</th>
+                  <th scope="col" className="col-roxo">Cartão Nubank (Roxo)</th>
+                  <th scope="col" className="col-ultra">Nubank Ultravioleta</th>
+                </tr>
+              </thead>
+              <tbody>
+                {CARDS.comparison.map((row) => (
+                  <tr key={row.feature}>
+                    <th scope="row">{row.feature}</th>
+                    <td>{row.roxo}</td>
+                    <td className="cell-ultra">{row.ultra}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </m.div>
+      )}
     </section>
   )
 }

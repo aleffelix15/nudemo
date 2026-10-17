@@ -7,6 +7,7 @@ import Easy from './components/Easy'
 import Steps from './components/Steps'
 import AppSection from './components/AppSection'
 import Benefits from './components/Benefits'
+import FAQ from './components/FAQ'
 import Footer from './components/Footer'
 import { DemoProvider } from './lib/demo'
 
@@ -14,11 +15,11 @@ export default function App() {
   return (
     <LazyMotion features={domAnimation} strict>
       <DemoProvider>
-        <a className="skip" href="#cartoes">
-          Pular para o conteúdo
+        <a className="skip" href="#main-content">
+          Pular para o conteúdo principal
         </a>
         <Header />
-        <main>
+        <main id="main-content">
           <div className="light">
             <Hero />
             <Cards />
@@ -29,6 +30,7 @@ export default function App() {
             <Steps />
             <AppSection />
             <Benefits />
+            <FAQ />
           </div>
         </main>
         <Footer />

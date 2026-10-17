@@ -13,12 +13,17 @@ const NuCard = forwardRef(function NuCard({ kit, variant = 0 }, ref) {
 
   const apply = (i) => {
     const v = kit.variants[i]
+    if (v?.ensureBack) v.ensureBack()
     if (slab.current) slab.current.material = v.edge
     if (front.current) front.current.material = v.front
     if (back.current) back.current.material = v.back
   }
 
-  useImperativeHandle(ref, () => ({ group: group.current, setVariant: apply }), [kit])
+  useImperativeHandle(ref, () => ({
+    group: group.current,
+    setVariant: apply,
+    ensureBack: () => kit.variants[variant]?.ensureBack?.(),
+  }), [kit, variant])
 
   const v0 = kit.variants[variant]
   return (

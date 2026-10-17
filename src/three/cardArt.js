@@ -123,9 +123,10 @@ export function drawNuLogo(ctx, x, y, targetWidth = 145, opacity = 1) {
 
 // Textura da face frontal (fiel à referência física app-light-and-card-ref.jpg)
 export function drawFront(variant = 0, { rounded = false, W, H } = {}) {
+  const isMobile = isMobileDevice()
   const tier = getQualityTier()
-  const defaultW = tier === 'low' ? 768 : TEX_W
-  const defaultH = tier === 'low' ? 1218 : TEX_H
+  const defaultW = isMobile || tier === 'low' ? 512 : TEX_W
+  const defaultH = isMobile || tier === 'low' ? 812 : TEX_H
   const targetW = W || defaultW
   const targetH = H || defaultH
   const cacheKey = `${variant}_${rounded}_${targetW}_${targetH}`
@@ -210,9 +211,10 @@ export function drawFront(variant = 0, { rounded = false, W, H } = {}) {
 
 // Textura do verso vertical do cartão
 export function drawBack(variant = 0, { W, H } = {}) {
+  const isMobile = isMobileDevice()
   const tier = getQualityTier()
-  const defaultW = tier === 'low' ? 768 : TEX_W
-  const defaultH = tier === 'low' ? 1218 : TEX_H
+  const defaultW = isMobile || tier === 'low' ? 512 : TEX_W
+  const defaultH = isMobile || tier === 'low' ? 812 : TEX_H
   const targetW = W || defaultW
   const targetH = H || defaultH
   const cacheKey = `${variant}_${targetW}_${targetH}`
@@ -345,30 +347,31 @@ export function drawBump(metal) {
     return canvasCache.bump.get(key)
   }
 
-  const size = isMobile ? 64 : 256
+  const size = isMobile ? 64 : 128
   const c = canvas(size, size)
   const ctx = c.getContext('2d')
-  ctx.fillStyle = '#808080'
-  ctx.fillRect(0, 0, size, size)
+  const imgData = ctx.createImageData(size, size)
+  const data32 = new Uint32Array(imgData.data.buffer)
 
-  if (!isMobile) {
-    if (metal) {
-      for (let i = 0; i < 400; i++) {
-        const v = 100 + Math.random() * 60
-        ctx.fillStyle = `rgba(${v},${v},${v},0.4)`
-        ctx.fillRect(0, Math.random() * size, size, 1)
-      }
-    } else {
-      // Micro-textura acetinada leve
-      for (let i = 0; i < 2000; i++) {
-        const x = Math.random() * size
-        const y = Math.random() * size
-        const s = Math.random() * 2
-        ctx.fillStyle = Math.random() > 0.5 ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'
-        ctx.fillRect(x, y, s, s)
+  if (metal) {
+    // Textura escovada horizontal de alta eficiência para metal
+    for (let y = 0; y < size; y++) {
+      const lineNoise = ((Math.random() * 32 - 16) | 0)
+      for (let x = 0; x < size; x++) {
+        const grain = ((Math.random() * 14 - 7) | 0)
+        const v = Math.min(255, Math.max(0, 128 + lineNoise + grain))
+        data32[y * size + x] = (255 << 24) | (v << 16) | (v << 8) | v
       }
     }
+  } else {
+    // Micro-relevo acetinado suave sem gargalo de chamadas 2D
+    for (let i = 0; i < size * size; i++) {
+      const v = Math.min(255, Math.max(0, 128 + ((Math.random() * 20 - 10) | 0)))
+      data32[i] = (255 << 24) | (v << 16) | (v << 8) | v
+    }
   }
+
+  ctx.putImageData(imgData, 0, 0)
   canvasCache.bump.set(key, c)
   return c
 }

@@ -23,7 +23,40 @@ function buildVariant(i, isMobile, effectiveAniso, precision) {
   const v = VARIANTS[i]
   const bump = tex(drawBump(v.metal), { srgb: false, aniso: isMobile ? 2 : 4, repeat: v.metal ? [1, 1] : [2, 3] })
   const front = tex(drawFront(i), { aniso: effectiveAniso })
-  const back = tex(drawBack(i), { aniso: effectiveAniso })
+
+  let back
+  let hasFullBack = false
+  const ensureBack = () => {
+    if (!hasFullBack) {
+      hasFullBack = true
+      const fullBack = tex(drawBack(i), { aniso: effectiveAniso })
+      if (backMat) {
+        backMat.map = fullBack
+        backMat.needsUpdate = true
+      }
+    }
+  }
+
+  // Deferimento inteligente do verso: o cartão inicia voltado para frente (0°),
+  // portanto renderizar o verso no first paint é desperdício de CPU.
+  if (i === 0 && typeof window !== 'undefined') {
+    const placeholder = document.createElement('canvas')
+    placeholder.width = 4
+    placeholder.height = 4
+    const pctx = placeholder.getContext('2d')
+    pctx.fillStyle = v.base[0]
+    pctx.fillRect(0, 0, 4, 4)
+    back = new THREE.CanvasTexture(placeholder)
+
+    if (typeof requestIdleCallback === 'function') {
+      requestIdleCallback(ensureBack, { timeout: 1500 })
+    } else {
+      setTimeout(ensureBack, 600)
+    }
+  } else {
+    hasFullBack = true
+    back = tex(drawBack(i), { aniso: effectiveAniso })
+  }
 
   // Configuração de material para face frontal
   const frontMat = isMobile
@@ -77,7 +110,7 @@ function buildVariant(i, isMobile, effectiveAniso, precision) {
   edge.userData.baseEnv = v.metal ? 1.25 : 1.0
   edge.envMapIntensity = edge.userData.baseEnv * (isMobile ? 0.8 : 1.05)
 
-  return { front: frontMat, back: backMat, edge, frontMap: front, meta: v }
+  return { front: frontMat, back: backMat, edge, frontMap: front, meta: v, ensureBack }
 }
 
 export function createCardKit(maxAniso = 16) {

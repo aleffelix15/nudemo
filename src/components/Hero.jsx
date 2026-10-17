@@ -73,7 +73,7 @@ export default function Hero() {
           transition={{ duration: 0.5 }}
           role="note"
         >
-          Conceito de redesign independente. Sem vínculo com o Nubank. Dados fictícios.
+          Demonstração independente de engenharia de software e portfólio.
         </m.div>
         <h1 className="hero-title" aria-label={HERO.title.join(' ')}>
           {HERO.title.map((t, i) => (
@@ -110,7 +110,7 @@ export default function Hero() {
             type="button"
             className="btn btn-primary"
             aria-label="Abrir conta digital no Nubank"
-            onClick={() => demo('Abrir conta', 'Demonstração de abertura de conta digital.')}
+            onClick={() => demo('Abrir conta digital', 'Demonstração de abertura de conta digital com rendimento de 100% do CDI.')}
           >
             {HERO.primary}
           </button>

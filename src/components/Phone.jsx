@@ -7,9 +7,12 @@ export default function Phone({
   onTabChange,
   className = '',
   alt = 'Interface do aplicativo Nubank',
+  caixinhasBalance = 5240,
 }) {
   const [showBalance, setShowBalance] = useState(true)
   const [copiedPix, setCopiedPix] = useState(false)
+  const [modoRuaActive, setModoRuaActive] = useState(false)
+  const [showVirtualCard, setShowVirtualCard] = useState(false)
   const pixTimerRef = useRef(null)
 
   useEffect(() => {
@@ -84,6 +87,25 @@ export default function Phone({
             </div>
           </div>
 
+          {/* Banner interativo de Modo Rua */}
+          <div className="nu-modorua-bar">
+            <button
+              type="button"
+              className={`nu-modorua-btn ${modoRuaActive ? 'is-active' : ''}`}
+              onClick={() => setModoRuaActive((m) => !m)}
+              aria-pressed={modoRuaActive}
+              title="Alternar proteção do Modo Rua"
+            >
+              <div className="nu-modorua-icon">
+                <Icon name="shield" size={13} />
+              </div>
+              <div className="nu-modorua-info">
+                <span>{modoRuaActive ? 'Modo Rua Ativo (Limite R$ 500)' : 'Modo Rua: Toque para ativar'}</span>
+              </div>
+              <span className="nu-modorua-switch" aria-hidden="true" />
+            </button>
+          </div>
+
           {/* Conteúdo rolável do app */}
           <div className="nu-app-scroll">
             {activeTab === 'conta' && (
@@ -91,12 +113,13 @@ export default function Phone({
                 {/* Bloco Conta (fundo #09090C) */}
                 <div className="nu-block nu-block-account">
                   <div className="nu-block-head">
-                    <span>Conta</span>
+                    <span>Conta digital</span>
                     <Icon name="chevron" size={14} className="nu-chevron" />
                   </div>
                   <div className="nu-balance-val tabular-nums">
                     {showBalance ? 'R$ 1.518,38' : '••••••••'}
                   </div>
+                  <span className="nu-cdi-tag">Rendimento automático 100% do CDI</span>
                 </div>
 
                 {/* Carrossel de Ações Rápidas (círculos #18181E, 48px) */}
@@ -123,7 +146,7 @@ export default function Phone({
                     <div className="nu-shortcut-circle">
                       <Icon name="loan" size={20} />
                     </div>
-                    <span>Pegar emprestado</span>
+                    <span>Empréstimo</span>
                   </div>
                   <div className="nu-shortcut">
                     <div className="nu-shortcut-circle">
@@ -140,15 +163,21 @@ export default function Phone({
                 </div>
 
                 {/* Card Meus Cartões */}
-                <div className="nu-card-pill-btn">
+                <div
+                  className="nu-card-pill-btn"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => onTabChange?.('cartao')}
+                  onKeyDown={(e) => e.key === 'Enter' && onTabChange?.('cartao')}
+                >
                   <Icon name="card" size={18} />
-                  <span>Meus cartões</span>
+                  <span>Meus cartões (Físico & Virtual 24h)</span>
                 </div>
 
                 {/* Card de Destaque */}
                 <div className="nu-promo-card">
                   <p>
-                    <b className="nu-accent-purple">Pix no Crédito:</b> transfira sem usar o saldo da conta.
+                    <b className="nu-accent-purple">Pix no Crédito:</b> parcele em até 12x no cartão sem usar seu saldo.
                   </p>
                 </div>
 
@@ -202,19 +231,46 @@ export default function Phone({
                   </div>
                 </div>
 
+                {/* Cartão Virtual Temporário 24h em Popover/Card */}
+                {showVirtualCard && (
+                  <div className="nu-virtual-card-popover" role="region" aria-label="Cartão virtual temporário">
+                    <div className="nu-virtual-top">
+                      <span className="nu-virtual-badge">Temporário 24h</span>
+                      <button
+                        type="button"
+                        className="nu-virtual-close"
+                        aria-label="Fechar cartão virtual"
+                        onClick={() => setShowVirtualCard(false)}
+                      >
+                        ×
+                      </button>
+                    </div>
+                    <div className="nu-virtual-number">•••• •••• •••• 4821</div>
+                    <div className="nu-virtual-row">
+                      <span>Validade: <b>23h 59m</b></span>
+                      <span>CVV: <b>{showBalance ? '382' : '•••'}</b></span>
+                    </div>
+                    <small className="nu-virtual-note">Exclusão automática em 24h para compras seguras</small>
+                  </div>
+                )}
+
                 {/* Ações do Cartão */}
                 <div className="nu-actions-grid">
                   <div className="nu-action-tile">
                     <Icon name="barcode" size={18} />
                     <span>Pagar fatura</span>
                   </div>
-                  <div className="nu-action-tile">
+                  <button
+                    type="button"
+                    className="nu-action-tile is-btn"
+                    onClick={() => setShowVirtualCard((v) => !v)}
+                  >
                     <Icon name="card" size={18} />
-                    <span>Cartão virtual</span>
-                  </div>
+                    <span>{showVirtualCard ? 'Ocultar virtual' : 'Virtual 24h'}</span>
+                  </button>
                   <div className="nu-action-tile">
                     <Icon name="lock" size={18} />
-                    <span>Bloquear cartão</span>
+                    <span>Bloquear</span>
                   </div>
                   <div className="nu-action-tile">
                     <Icon name="shield" size={18} />
@@ -253,7 +309,7 @@ export default function Phone({
                   </div>
                   <span className="nu-sublabel">Total guardado rendendo 100% do CDI</span>
                   <div className="nu-balance-val tabular-nums">
-                    {showBalance ? 'R$ 5.240,00' : '••••••••'}
+                    {showBalance ? `R$ ${Number(caixinhasBalance).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '••••••••'}
                   </div>
                   <span className="nu-cdi-badge">+R$ 48,20 de rendimento este mês</span>
                 </div>
@@ -271,7 +327,7 @@ export default function Phone({
                       </div>
                     </div>
                     <div className="nu-box-val tabular-nums">
-                      {showBalance ? 'R$ 3.500,00' : '••••••••'}
+                      {showBalance ? `R$ ${Number(Math.max(0, caixinhasBalance - 1740)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '••••••••'}
                     </div>
                   </div>
 
