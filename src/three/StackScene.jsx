@@ -81,7 +81,11 @@ function Scene({ progress, copies, reduced, running, isMobile, isSmallMobile }) 
   const isSleeping = useRef(false)
   const smoothedP = useRef(typeof progress?.current === 'number' ? progress.current : 0)
 
+  const runningRef = useRef(running)
+  runningRef.current = running
+
   const wakeUp = () => {
+    if (!runningRef.current) return
     isSleeping.current = false
     invalidate()
   }

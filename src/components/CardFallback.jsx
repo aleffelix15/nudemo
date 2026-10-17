@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { drawFront, TEX_W, TEX_H, HOLDER_NAME } from '../three/cardArt'
+import { TEX_W, TEX_H, HOLDER_NAME } from '../three/cardConsts'
 import { useFontsReady } from '../three/hooks'
 import { NuLogo, MastercardLogo, EmvChipSvg, ContactlessWaveSvg } from './Icons'
 
@@ -10,9 +10,43 @@ export function useCardImage(variant = 0, width = 560) {
 
   useEffect(() => {
     if (!ready) return
+    let cancelled = false
+    let createdUrl = null
+
     const h = Math.round(width * (TEX_H / TEX_W))
-    const c = drawFront(variant, { rounded: true, W: width, H: h })
-    setSrc(c.toDataURL('image/png'))
+
+    const run = () => {
+      import('../three/cardArt').then(({ drawFront }) => {
+        if (cancelled) return
+        const c = drawFront(variant, { rounded: true, W: width, H: h })
+        if (c.toBlob) {
+          c.toBlob((blob) => {
+            if (cancelled || !blob) return
+            createdUrl = URL.createObjectURL(blob)
+            setSrc(createdUrl)
+          }, 'image/png')
+        } else {
+          setSrc(c.toDataURL('image/png'))
+        }
+      })
+    }
+
+    const id =
+      typeof requestIdleCallback === 'function'
+        ? requestIdleCallback(run, { timeout: 2000 })
+        : setTimeout(run, 200)
+
+    return () => {
+      cancelled = true
+      if (typeof cancelIdleCallback === 'function' && typeof id === 'number') {
+        cancelIdleCallback(id)
+      } else {
+        clearTimeout(id)
+      }
+      if (createdUrl) {
+        URL.revokeObjectURL(createdUrl)
+      }
+    }
   }, [ready, variant, width])
 
   return src

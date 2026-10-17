@@ -35,6 +35,25 @@ export default function Track() {
   const reduced = useReducedMotionMQ()
   const mobile = useIsMobile()
   const [activeCat, setActiveCat] = useState(0)
+
+  const handleCatKeyDown = (e, i) => {
+    let nextIndex = null
+    if (e.key === 'ArrowRight') {
+      nextIndex = (i + 1) % CATEGORIES.length
+    } else if (e.key === 'ArrowLeft') {
+      nextIndex = (i - 1 + CATEGORIES.length) % CATEGORIES.length
+    } else if (e.key === 'Home') {
+      nextIndex = 0
+    } else if (e.key === 'End') {
+      nextIndex = CATEGORIES.length - 1
+    }
+    if (nextIndex !== null) {
+      e.preventDefault()
+      setActiveCat(nextIndex)
+      document.getElementById(`track-tab-${nextIndex}`)?.focus()
+    }
+  }
+
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] })
   const rotate = useTransform(scrollYProgress, [0, 1], [mobile ? 2 : 6, mobile ? -3 : -8])
   const lift = useTransform(scrollYProgress, [0, 1], [mobile ? 10 : 30, mobile ? -10 : -30])
@@ -98,19 +117,23 @@ export default function Track() {
           {CATEGORIES.map((cat, i) => (
             <button
               key={cat}
+              id={`track-tab-${i}`}
               type="button"
               role="tab"
+              tabIndex={activeCat === i ? 0 : -1}
               aria-selected={activeCat === i}
+              aria-controls="track-tabpanel"
               className={`track-cat-btn ${activeCat === i ? 'is-active' : ''}`}
-              onClick={() => {
-                setActiveCat(i)
-                demo(`Categoria: ${cat}`, `Visualizando funcionalidades da categoria ${cat}.`)
-              }}
+              onClick={() => setActiveCat(i)}
+              onKeyDown={(e) => handleCatKeyDown(e, i)}
             >
               {cat}
             </button>
           ))}
         </div>
+        <span className="sr-only" aria-live="polite">
+          Categoria selecionada: {CATEGORIES[activeCat]}
+        </span>
 
         <ul className="ticks" role="list">
           {TRACK.items.map((t) => (

@@ -2,8 +2,12 @@ import puppeteer from 'puppeteer-core'
 import fs from 'fs'
 import path from 'path'
 
-const EDGE_PATH = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe'
-const URL = 'http://localhost:5173'
+const EDGE_PATH =
+  process.env.CHROME_PATH ||
+  (fs.existsSync('C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe')
+    ? 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe'
+    : 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe')
+const URL = process.env.BASE_URL || process.argv[2] || 'http://localhost:5173'
 
 function percentile(arr, p) {
   if (arr.length === 0) return 0
@@ -198,7 +202,7 @@ async function runBenchmark() {
     console.log(`  [Desktop] FPS Médio do Hero: ${heroDeskAvgFps.toFixed(1)} fps (Critério aceitação: 60 fps estáveis)`)
     console.log(`  [Desktop] p95 Frame Time: ${heroDeskP95.toFixed(2)} ms`)
 
-    const screenshotsDir = path.resolve('public', 'screenshots')
+    const screenshotsDir = path.resolve('docs', 'screenshots')
     if (!fs.existsSync(screenshotsDir)) fs.mkdirSync(screenshotsDir, { recursive: true })
     const heroScreenshotPath = path.join(screenshotsDir, 'after_hero_desktop.png')
     await pageHeroDesktop.screenshot({ path: heroScreenshotPath, clip: { x: 600, y: 50, width: 650, height: 600 } })

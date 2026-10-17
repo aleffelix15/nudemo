@@ -19,7 +19,67 @@ export function getSharedCardKit(maxAniso = 16) {
   return sharedCardKit
 }
 
-// Cria kit de geometrias, texturas e materiais PBR com acabamento fotorealista
+function buildVariant(i, isMobile, effectiveAniso, precision) {
+  const v = VARIANTS[i]
+  const bump = tex(drawBump(v.metal), { srgb: false, aniso: isMobile ? 2 : 4, repeat: v.metal ? [1, 1] : [2, 3] })
+  const front = tex(drawFront(i), { aniso: effectiveAniso })
+  const back = tex(drawBack(i), { aniso: effectiveAniso })
+
+  // Configuração de material para face frontal
+  const frontMat = isMobile
+    ? new THREE.MeshStandardMaterial({
+        map: front,
+        roughness: 0.28,
+        metalness: v.metal ? 0.85 : 0.06,
+        precision: 'mediump',
+      })
+    : new THREE.MeshPhysicalMaterial({
+        map: front,
+        bumpMap: bump,
+        bumpScale: v.metal ? 0.22 : 0.06,
+        metalness: v.metal ? 0.88 : 0.06, // Roxo < 0.1 conforme especificação
+        roughness: v.metal ? 0.24 : 0.28,
+        clearcoat: v.metal ? 0.15 : 0.35,
+        clearcoatRoughness: 0.22,
+        anisotropy: v.metal ? 0.85 : 0, // Reflexo anisotrópico escovado horizontal para Ultravioleta
+        anisotropyRotation: 0,
+        precision,
+      })
+  frontMat.userData.baseEnv = v.metal ? 1.35 : 1.15
+  frontMat.envMapIntensity = frontMat.userData.baseEnv * (isMobile ? 0.8 : 1.05)
+
+  // Verso usa MeshStandardMaterial (economia de GPU, clearcoat desnecessário no verso)
+  const backMat = new THREE.MeshStandardMaterial({
+    map: back,
+    roughness: 0.34,
+    metalness: v.metal ? 0.75 : 0.05,
+    precision,
+  })
+  backMat.userData.baseEnv = v.metal ? 1.0 : 0.9
+  backMat.envMapIntensity = backMat.userData.baseEnv * (isMobile ? 0.8 : 1.05)
+
+  // Borda chanfrada ISO que reflete o rim light de estúdio
+  const edge = isMobile
+    ? new THREE.MeshStandardMaterial({
+        color: v.edge,
+        roughness: 0.26,
+        metalness: v.metal ? 0.85 : 0.08,
+        precision: 'mediump',
+      })
+    : new THREE.MeshPhysicalMaterial({
+        color: v.edge,
+        metalness: v.metal ? 0.88 : 0.08,
+        roughness: 0.26,
+        clearcoat: 0.30,
+        clearcoatRoughness: 0.20,
+        precision,
+      })
+  edge.userData.baseEnv = v.metal ? 1.25 : 1.0
+  edge.envMapIntensity = edge.userData.baseEnv * (isMobile ? 0.8 : 1.05)
+
+  return { front: frontMat, back: backMat, edge, frontMap: front, meta: v }
+}
+
 export function createCardKit(maxAniso = 16) {
   if (sharedCardKit) return sharedCardKit
 
@@ -43,64 +103,47 @@ export function createCardKit(maxAniso = 16) {
   chipMat.userData.baseEnv = 1.3
   chipMat.envMapIntensity = chipMat.userData.baseEnv * (isMobile ? 0.8 : 1.05)
 
-  const variants = VARIANTS.map((v, i) => {
-    const bump = tex(drawBump(v.metal), { srgb: false, aniso: isMobile ? 2 : 4, repeat: v.metal ? [1, 1] : [2, 3] })
-    const front = tex(drawFront(i), { aniso: effectiveAniso })
-    const back = tex(drawBack(i), { aniso: effectiveAniso })
+  // Instanciação escalonada: inicializa variante 0 de imediato para first render veloz
+  const variantsArray = []
+  variantsArray[0] = buildVariant(0, isMobile, effectiveAniso, precision)
 
-    // Configuração de material para face frontal
-    const frontMat = isMobile
-      ? new THREE.MeshStandardMaterial({
-          map: front,
-          roughness: 0.28,
-          metalness: v.metal ? 0.85 : 0.06,
-          precision: 'mediump',
-        })
-      : new THREE.MeshPhysicalMaterial({
-          map: front,
-          bumpMap: bump,
-          bumpScale: v.metal ? 0.22 : 0.06,
-          metalness: v.metal ? 0.88 : 0.06, // Roxo < 0.1 conforme especificação
-          roughness: v.metal ? 0.24 : 0.28,
-          clearcoat: v.metal ? 0.15 : 0.35,
-          clearcoatRoughness: 0.22,
-          anisotropy: v.metal ? 0.85 : 0, // Reflexo anisotrópico escovado horizontal para Ultravioleta
-          anisotropyRotation: 0,
-          precision,
-        })
-    frontMat.userData.baseEnv = v.metal ? 1.35 : 1.15
-    frontMat.envMapIntensity = frontMat.userData.baseEnv * (isMobile ? 0.8 : 1.05)
+  const getVariant = (i) => {
+    if (!variantsArray[i]) {
+      variantsArray[i] = buildVariant(i, isMobile, effectiveAniso, precision)
+    }
+    return variantsArray[i]
+  }
 
-    // Verso usa MeshStandardMaterial (economia de GPU, clearcoat desnecessário no verso)
-    const backMat = new THREE.MeshStandardMaterial({
-      map: back,
-      roughness: 0.34,
-      metalness: v.metal ? 0.75 : 0.05,
-      precision,
-    })
-    backMat.userData.baseEnv = v.metal ? 1.0 : 0.9
-    backMat.envMapIntensity = backMat.userData.baseEnv * (isMobile ? 0.8 : 1.05)
+  // Prepara variante 1 de forma ociosa antes do início do giro
+  if (typeof window !== 'undefined') {
+    if (typeof requestIdleCallback === 'function') {
+      requestIdleCallback(() => getVariant(1), { timeout: 1800 })
+    } else {
+      setTimeout(() => getVariant(1), 800)
+    }
+  }
 
-    // Borda chanfrada ISO que reflete o rim light de estúdio
-    const edge = isMobile
-      ? new THREE.MeshStandardMaterial({
-          color: v.edge,
-          roughness: 0.26,
-          metalness: v.metal ? 0.85 : 0.08,
-          precision: 'mediump',
-        })
-      : new THREE.MeshPhysicalMaterial({
-          color: v.edge,
-          metalness: v.metal ? 0.88 : 0.08,
-          roughness: 0.26,
-          clearcoat: 0.30,
-          clearcoatRoughness: 0.20,
-          precision,
-        })
-    edge.userData.baseEnv = v.metal ? 1.25 : 1.0
-    edge.envMapIntensity = edge.userData.baseEnv * (isMobile ? 0.8 : 1.05)
-
-    return { front: frontMat, back: backMat, edge, frontMap: front, meta: v }
+  const variants = new Proxy(variantsArray, {
+    get(target, prop) {
+      if (typeof prop === 'string' && !isNaN(prop)) {
+        const idx = Number(prop)
+        if (idx >= 0 && idx < VARIANTS.length) {
+          return getVariant(idx)
+        }
+      }
+      if (prop === 'length') return VARIANTS.length
+      if (prop === 'map') {
+        return (fn) => VARIANTS.map((_, i) => fn(getVariant(i), i))
+      }
+      if (prop === 'forEach') {
+        return (fn) => {
+          for (let i = 0; i < VARIANTS.length; i++) {
+            if (variantsArray[i]) fn(variantsArray[i], i)
+          }
+        }
+      }
+      return Reflect.get(target, prop)
+    },
   })
 
   const kit = {

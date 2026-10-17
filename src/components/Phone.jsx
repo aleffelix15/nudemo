@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Icon from './Icons'
 
 // Chassis de alta precisão em titânio escuro (#1E1E24) e interface nativa 100% vetorial do Nubank em Dark Mode
@@ -10,12 +10,27 @@ export default function Phone({
 }) {
   const [showBalance, setShowBalance] = useState(true)
   const [copiedPix, setCopiedPix] = useState(false)
+  const pixTimerRef = useRef(null)
+
+  useEffect(() => {
+    return () => {
+      if (pixTimerRef.current) clearTimeout(pixTimerRef.current)
+    }
+  }, [])
 
   const toggleBalance = () => setShowBalance((s) => !s)
 
-  const handlePixClick = () => {
+  const handlePixClick = async () => {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText('chave.demo@exemplo.com')
+      }
+    } catch {
+      // Ignora erro de permissão caso negado pelo navegador
+    }
     setCopiedPix(true)
-    setTimeout(() => setCopiedPix(false), 2200)
+    if (pixTimerRef.current) clearTimeout(pixTimerRef.current)
+    pixTimerRef.current = setTimeout(() => setCopiedPix(false), 2200)
   }
 
   return (
@@ -285,7 +300,7 @@ export default function Phone({
           </div>
 
           {/* Barra de Navegação Inferior Flutuante */}
-          <div className="nu-bottom-nav" aria-hidden="true">
+          <div className="nu-bottom-nav" role="navigation" aria-label="Navegação rápida do app">
             <div className="nu-bottom-pill">
               <button
                 type="button"

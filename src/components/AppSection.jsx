@@ -11,45 +11,68 @@ const SLOTS = [
   { cls: 'c4', from: 30 },
 ]
 
+const TABS = [
+  { id: 'conta', label: 'Conta & Pix' },
+  { id: 'cartao', label: 'Cartão & Fatura' },
+  { id: 'caixinhas', label: 'Caixinhas & Limite' },
+]
+
 export default function AppSection() {
   const demo = useDemo()
   const [activeTab, setActiveTab] = useState('conta') // 'conta' | 'cartao' | 'caixinhas'
+
+  const handleTabKeyDown = (e, currentId) => {
+    const idx = TABS.findIndex((t) => t.id === currentId)
+    let nextIdx = null
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      nextIdx = (idx + 1) % TABS.length
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      nextIdx = (idx - 1 + TABS.length) % TABS.length
+    } else if (e.key === 'Home') {
+      nextIdx = 0
+    } else if (e.key === 'End') {
+      nextIdx = TABS.length - 1
+    }
+    if (nextIdx !== null) {
+      e.preventDefault()
+      const nextTab = TABS[nextIdx]
+      setActiveTab(nextTab.id)
+      document.getElementById(`app-tab-${nextTab.id}`)?.focus()
+    }
+  }
 
   return (
     <section className="appsec" id="app" aria-label="Aplicativo Nubank">
       <div className="app-device">
         {/* Seletor interativo que altera estados reais dentro do celular */}
         <div className="app-mode-selector" role="tablist" aria-label="Visualização da experiência">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'conta'}
-            className={`app-mode-tab ${activeTab === 'conta' ? 'is-active' : ''}`}
-            onClick={() => setActiveTab('conta')}
-          >
-            Conta & Pix
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'cartao'}
-            className={`app-mode-tab ${activeTab === 'cartao' ? 'is-active' : ''}`}
-            onClick={() => setActiveTab('cartao')}
-          >
-            Cartão & Fatura
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'caixinhas'}
-            className={`app-mode-tab ${activeTab === 'caixinhas' ? 'is-active' : ''}`}
-            onClick={() => setActiveTab('caixinhas')}
-          >
-            Caixinhas & Limite
-          </button>
+          {TABS.map((tab) => {
+            const isSelected = activeTab === tab.id
+            return (
+              <button
+                key={tab.id}
+                id={`app-tab-${tab.id}`}
+                type="button"
+                role="tab"
+                tabIndex={isSelected ? 0 : -1}
+                aria-selected={isSelected}
+                aria-controls={`app-panel-${tab.id}`}
+                className={`app-mode-tab ${isSelected ? 'is-active' : ''}`}
+                onClick={() => setActiveTab(tab.id)}
+                onKeyDown={(e) => handleTabKeyDown(e, tab.id)}
+              >
+                {tab.label}
+              </button>
+            )
+          })}
         </div>
 
-        <div className="app-phone-wrapper">
+        <div
+          className="app-phone-wrapper"
+          id={`app-panel-${activeTab}`}
+          role="tabpanel"
+          aria-labelledby={`app-tab-${activeTab}`}
+        >
           <Phone
             activeTab={activeTab}
             onTabChange={setActiveTab}

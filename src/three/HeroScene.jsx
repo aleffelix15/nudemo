@@ -70,7 +70,11 @@ function Scene({ reduced, interactive, running, onReady, isMobile, isSmallMobile
   const dwellTimer = useRef(null)
   const st = useRef({ t: 0, variant: 0, px: 0, py: 0, tx: 0, ty: 0, scroll: 0, lastNow: performance.now() })
 
+  const runningRef = useRef(running)
+  runningRef.current = running
+
   const wakeUp = () => {
+    if (!runningRef.current) return
     isSleeping.current = false
     invalidate()
   }

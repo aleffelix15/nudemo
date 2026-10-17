@@ -12,6 +12,7 @@ import {
   hasWebGL,
   useCanvasVisibility,
   useNearViewport,
+  useSectionScrollProgress,
 } from '../three/hooks'
 
 const StackScene = lazy(() => import('../three/StackScene'))
@@ -86,7 +87,7 @@ export default function Cards() {
   const stageRef = useRef(null)
   const isNear = useNearViewport(stageRef, '350px')
   const isVisible = useCanvasVisibility(stageRef, '250px 0px')
-  const progress = useRef(0.48)
+  const progress = useSectionScrollProgress(stageRef)
 
   return (
     <section className="cards" id="cartoes" ref={stageRef}>
