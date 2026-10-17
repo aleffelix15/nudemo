@@ -20,13 +20,17 @@ export function useCardImage(variant = 0, width = 560) {
         if (cancelled) return
         const c = drawFront(variant, { rounded: true, W: width, H: h })
         if (c.toBlob) {
-          c.toBlob((blob) => {
-            if (cancelled || !blob) return
-            createdUrl = URL.createObjectURL(blob)
-            setSrc(createdUrl)
-          }, 'image/png')
+          c.toBlob(
+            (blob) => {
+              if (cancelled || !blob) return
+              createdUrl = URL.createObjectURL(blob)
+              setSrc(createdUrl)
+            },
+            'image/webp',
+            0.88
+          )
         } else {
-          setSrc(c.toDataURL('image/png'))
+          setSrc(c.toDataURL('image/webp', 0.88))
         }
       })
     }

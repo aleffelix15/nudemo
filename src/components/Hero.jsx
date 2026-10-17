@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { m } from 'framer-motion'
 import { HERO } from '../content'
 import { useDemo } from '../lib/demo'
@@ -21,8 +21,47 @@ export default function Hero() {
   const reduced = useReducedMotionMQ()
   const [gl] = useState(() => hasWebGL())
   const [ready, setReady] = useState(false)
+  const [canMountScene, setCanMountScene] = useState(false)
   const onReady = useCallback(() => setReady(true), [])
-  const showFallback = !gl
+
+  useEffect(() => {
+    if (!gl) return
+
+    let cancelled = false
+    let handle = null
+
+    const activate = () => {
+      if (cancelled) return
+      requestAnimationFrame(() => {
+        if (!cancelled) setCanMountScene(true)
+      })
+    }
+
+    // Carregamento diferido real: permite que HTML, CSS, fontes e FCP renderizem
+    // instantaneamente antes de iniciar o Three.js e a compilação WebGL
+    if (typeof requestIdleCallback === 'function') {
+      handle = requestIdleCallback(activate, { timeout: 1200 })
+    } else {
+      handle = setTimeout(activate, 300)
+    }
+
+    const onUserAction = () => {
+      activate()
+    }
+    window.addEventListener('scroll', onUserAction, { passive: true, once: true })
+    window.addEventListener('pointerdown', onUserAction, { passive: true, once: true })
+
+    return () => {
+      cancelled = true
+      if (typeof cancelIdleCallback === 'function' && typeof handle === 'number') {
+        cancelIdleCallback(handle)
+      } else {
+        clearTimeout(handle)
+      }
+      window.removeEventListener('scroll', onUserAction)
+      window.removeEventListener('pointerdown', onUserAction)
+    }
+  }, [gl])
 
   return (
     <section className="hero" id="topo" aria-label="Apresentação do Nubank">
@@ -97,8 +136,12 @@ export default function Hero() {
       </div>
 
       <div className={`hero-stage ${ready ? 'is-ready' : ''}`} ref={stage}>
-        {gl ? (
-          <SceneBoundary fallback={<CardFallback />}>
+        {/* Placeholder premium do cartão: visível de imediato no first paint sem espera de WebGL */}
+        <CardFallback />
+
+        {/* Cena 3D: carregamento e montagem estritamente diferidos pós-FCP */}
+        {gl && canMountScene ? (
+          <SceneBoundary fallback={null}>
             <Suspense fallback={null}>
               <HeroScene
                 reduced={reduced}
@@ -109,7 +152,6 @@ export default function Hero() {
             </Suspense>
           </SceneBoundary>
         ) : null}
-        {showFallback ? <CardFallback /> : null}
       </div>
     </section>
   )

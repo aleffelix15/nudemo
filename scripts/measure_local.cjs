@@ -87,13 +87,23 @@ async function measure() {
 
       const metrics = await page.evaluate(() => {
         const m = window.__metrics
+        const paintEntries = performance.getEntriesByType('paint')
+        let fcp = m.fcp
+        for (const p of paintEntries) {
+          if (p.name === 'first-contentful-paint') fcp = Math.round(p.startTime)
+        }
+        const lcpEntries = performance.getEntriesByType('largest-contentful-paint')
+        let lcp = m.lcp
+        if (lcpEntries.length > 0) {
+          lcp = Math.round(lcpEntries[lcpEntries.length - 1].startTime)
+        }
         const resources = performance.getEntriesByType('resource').map(r => ({
           name: r.name.split('/').pop().split('?')[0],
           size: r.transferSize,
           duration: Math.round(r.duration),
           type: r.initiatorType
         }))
-        return { ...m, resources }
+        return { ...m, fcp, lcp, resources }
       })
 
       const totalTbt = metrics.longTasks.reduce((sum, t) => sum + Math.max(0, t.duration - 50), 0)
@@ -125,13 +135,23 @@ async function measure() {
 
       const metrics = await page.evaluate(() => {
         const m = window.__metrics
+        const paintEntries = performance.getEntriesByType('paint')
+        let fcp = m.fcp
+        for (const p of paintEntries) {
+          if (p.name === 'first-contentful-paint') fcp = Math.round(p.startTime)
+        }
+        const lcpEntries = performance.getEntriesByType('largest-contentful-paint')
+        let lcp = m.lcp
+        if (lcpEntries.length > 0) {
+          lcp = Math.round(lcpEntries[lcpEntries.length - 1].startTime)
+        }
         const resources = performance.getEntriesByType('resource').map(r => ({
           name: r.name.split('/').pop().split('?')[0],
           size: r.transferSize,
           duration: Math.round(r.duration),
           type: r.initiatorType
         }))
-        return { ...m, resources }
+        return { ...m, fcp, lcp, resources }
       })
 
       const totalTbt = metrics.longTasks.reduce((sum, t) => sum + Math.max(0, t.duration - 50), 0)

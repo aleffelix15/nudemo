@@ -239,9 +239,9 @@ async function runBenchmark() {
       const ctx = c.getContext('2d')
       ctx.drawImage(img, 0, 0)
       const points = [
-        { x: 360, y: 250, label: 'Ponto 1 (Superior)' },
-        { x: 420, y: 350, label: 'Ponto 2 (Médio)' },
-        { x: 340, y: 420, label: 'Ponto 3 (Inferior)' },
+        { x: 340, y: 260, label: 'Ponto 1 (Superior)' },
+        { x: 350, y: 310, label: 'Ponto 2 (Médio)' },
+        { x: 330, y: 370, label: 'Ponto 3 (Inferior)' },
       ]
       return points.map((pt) => {
         const p = ctx.getImageData(pt.x, pt.y, 1, 1).data

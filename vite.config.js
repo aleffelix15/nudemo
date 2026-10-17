@@ -25,6 +25,12 @@ export default defineConfig({
     },
     rollupOptions: {
       output: {
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name && assetInfo.name.endsWith('.woff2')) {
+            return 'assets/[name][extname]'
+          }
+          return 'assets/[name]-[hash][extname]'
+        },
         // Separa o Three.js e R3F em chunks dedicados para carregamento estritamente sob demanda
         manualChunks: {
           'vendor-three': ['three'],
