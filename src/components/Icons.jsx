@@ -51,7 +51,7 @@ export default function Icon({ name, size = 20, className = '', fill = false }) 
   )
 }
 
-// Logotipo vetorial oficial do Nubank reproduzindo a fita contínua
+// Logotipo vetorial estilizado reproduzindo a fita contínua
 export function NuLogo({ size = 32, width, height, className = '', color = 'currentColor', title = 'Nubank' }) {
   const w = width || size
   const h = height || size
@@ -72,15 +72,6 @@ export function NuLogo({ size = 32, width, height, className = '', color = 'curr
   )
 }
 
-export function NuMark({ className = '', size = 32, color }) {
-  return (
-    <span className={`numark-wrap ${className}`} style={{ display: 'inline-flex', alignItems: 'center' }}>
-      <NuLogo size={size} color={color || 'var(--nu)'} />
-    </span>
-  )
-}
-
-// Logotipo vetorial oficial Mastercard (círculos vermelho e amarelo com blend)
 // Marcador neutro da bandeira de pagamento (dois círculos sobrepostos em violeta claro e magenta translúcidos)
 export function MastercardLogo({ size = 32, className = '' }) {
   const h = Math.round(size * 0.62)
@@ -99,7 +90,6 @@ export function MastercardLogo({ size = 32, className = '' }) {
     </svg>
   )
 }
-export const PaymentBadgeSvg = MastercardLogo
 
 // Chip metálico EMV de alta precisão vetorial (prateado/champagne, padrão ISO/IEC 7816)
 export function EmvChipSvg({ width = 36, className = '' }) {

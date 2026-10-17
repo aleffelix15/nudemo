@@ -28,4 +28,3 @@ export const smooth = (t) => t * t * (3 - 2 * t)
 
 // Tolerância estrita para parada completa do loop 3D (Render on Demand a 0% GPU)
 export const EPSILON = 0.0008
-export const isConverged = (current, target, eps = EPSILON) => Math.abs(target - current) < eps

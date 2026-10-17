@@ -112,17 +112,6 @@ export function useNearViewport(ref, margin = '400px') {
   return near
 }
 
-export function useInView(ref, margin = '250px 0px') {
-  const [v, setV] = useState(false)
-  useEffect(() => {
-    const el = ref.current
-    if (!el || typeof IntersectionObserver === 'undefined') return
-    const io = new IntersectionObserver(([e]) => setV(e.isIntersecting), { rootMargin: margin })
-    io.observe(el)
-    return () => io.disconnect()
-  }, [ref, margin])
-  return v
-}
 
 // Hook de visibilidade dedicado para controle de ciclo de vida e economia de GPU nas cenas WebGL (pré-ativação em 250px)
 export function useCanvasVisibility(ref, margin = '250px 0px') {

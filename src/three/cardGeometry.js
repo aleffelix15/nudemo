@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { isMobileDevice } from './quality.js'
 
-// Proporção oficial ISO/IEC 7810 ID-1: 53,98 x 85,60 x 0,76 mm (orientação vertical autêntica)
+// Proporção padrão ISO/IEC 7810 ID-1: 53,98 x 85,60 x 0,76 mm (orientação vertical)
 // Proporção 1 : 1.5858. 0,76 mm de espessura equivale a 0.0304 unidades 3D (2.159 * 0.76 / 53.98)
 export const CARD = {
   w: 2.159,
@@ -28,8 +28,6 @@ export function roundedRect(w, h, r) {
   s.absarc(x + r, y + r, r, Math.PI, Math.PI * 1.5, false)
   return s
 }
-
-export { isMobileDevice }
 
 // Cache singleton em nível de módulo para reutilização universal
 let cachedSlab = null

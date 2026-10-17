@@ -1,8 +1,6 @@
 import * as THREE from 'three'
 import { isMobileDevice } from './quality.js'
 
-export { isMobileDevice }
-
 // Cache fraco isolado por WebGLRenderer para evitar conflito entre Hero e Stack (B03)
 const studioEnvMap = new WeakMap()
 

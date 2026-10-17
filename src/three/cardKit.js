@@ -1,5 +1,6 @@
 import * as THREE from 'three'
-import { VARIANTS, TEX_W, TEX_H, drawFront, drawBack, drawChip, drawBump, tex } from './cardArt'
+import { VARIANTS, drawFront, drawBack, drawChip, drawBump, tex } from './cardArt'
+import { TEX_W, TEX_H } from './cardConsts'
 import { CARD, getSlabGeometry, getFaceGeometry, getChipGeometry } from './cardGeometry'
 import { isMobileDevice, onQualityTierChange } from './quality.js'
 
