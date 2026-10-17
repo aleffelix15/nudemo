@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useRef, useState } from 'react'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { HERO } from '../content'
 import { useDemo } from '../lib/demo'
 import { hasWebGL, useCanvasVisibility, useIsMobile, useReducedMotionMQ } from '../three/hooks'
@@ -27,7 +27,7 @@ export default function Hero() {
   return (
     <section className="hero" id="topo" aria-label="Apresentação do Nubank">
       <div className="hero-copy">
-        <motion.div
+        <m.div
           className="hero-badge"
           initial={reduced ? false : { opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
@@ -35,11 +35,11 @@ export default function Hero() {
           role="note"
         >
           Conceito de redesign independente. Sem vínculo com o Nubank. Dados fictícios.
-        </motion.div>
+        </m.div>
         <h1 className="hero-title" aria-label={HERO.title.join(' ')}>
           {HERO.title.map((t, i) => (
             <span className="mask" key={t} aria-hidden="true">
-              <motion.span
+              <m.span
                 className={`mask-in ${i === 1 ? 'is-accent' : ''}`}
                 variants={line}
                 custom={i}
@@ -47,21 +47,21 @@ export default function Hero() {
                 animate="show"
               >
                 {t}
-              </motion.span>
+              </m.span>
             </span>
           ))}
         </h1>
 
-        <motion.p
+        <m.p
           className="hero-lead"
           initial={reduced ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.55, duration: 0.7 }}
         >
           {HERO.lead}
-        </motion.p>
+        </m.p>
 
-        <motion.div
+        <m.div
           className="hero-cta"
           initial={reduced ? false : { opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -78,9 +78,9 @@ export default function Hero() {
           <a className="btn btn-ghost" href="#app" aria-label="Conhecer o aplicativo do Nubank">
             {HERO.secondary}
           </a>
-        </motion.div>
+        </m.div>
 
-        <motion.ul
+        <m.ul
           className="hero-notes"
           aria-label="Destaques do serviço"
           initial={reduced ? false : { opacity: 0, y: 12 }}
@@ -93,7 +93,7 @@ export default function Hero() {
               <span>{n.text}</span>
             </li>
           ))}
-        </motion.ul>
+        </m.ul>
       </div>
 
       <div className={`hero-stage ${ready ? 'is-ready' : ''}`} ref={stage}>

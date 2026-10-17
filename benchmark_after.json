@@ -1,52 +1,52 @@
 {
-  "timestamp": "2026-10-14T18:52:01.171Z",
+  "timestamp": "2026-10-17T00:55:42.769Z",
   "load": {
-    "durationMs": 10698,
-    "longTasks50": 14,
-    "longTasks100": 12,
-    "maxLongTaskMs": 972
+    "durationMs": 4904,
+    "longTasks50": 15,
+    "longTasks100": 11,
+    "maxLongTaskMs": 997
   },
   "scroll": {
-    "totalFrames": 358,
-    "avgFps": 59.81121042519422,
+    "totalFrames": 360,
+    "avgFps": 59.9790073474284,
     "p50Ms": 16.699999999999818,
-    "p95Ms": 16.800000000000182,
-    "p99Ms": 16.900000000000546,
-    "maxDeltaMs": 33.399999999999636,
+    "p95Ms": 16.80000000000109,
+    "p99Ms": 17.000000000000455,
+    "maxDeltaMs": 17.100000000000364,
     "longTasks50": 0,
     "longTasks100": 0
   },
   "heroDesktop": {
-    "avgFps": 59.97866143775774,
-    "p95Ms": 17.200000000000728
+    "avgFps": 59.973541084815515,
+    "p95Ms": 17.299999999999272
   },
   "colorSamples": [
     {
       "x": 360,
       "y": 250,
       "label": "Ponto 1 (Superior)",
-      "r": 137,
+      "r": 139,
       "g": 0,
       "b": 203,
-      "hex": "#8900cb"
+      "hex": "#8b00cb"
     },
     {
       "x": 420,
       "y": 350,
       "label": "Ponto 2 (Médio)",
-      "r": 125,
+      "r": 126,
       "g": 0,
-      "b": 199,
-      "hex": "#7d00c7"
+      "b": 196,
+      "hex": "#7e00c4"
     },
     {
       "x": 340,
       "y": 420,
       "label": "Ponto 3 (Inferior)",
-      "r": 126,
+      "r": 129,
       "g": 0,
       "b": 199,
-      "hex": "#7e00c7"
+      "hex": "#8100c7"
     }
   ]
 }

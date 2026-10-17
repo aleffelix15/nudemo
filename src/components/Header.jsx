@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { NAV } from '../content'
 import Icon, { NuLogo } from './Icons'
 import { useDemo } from '../lib/demo'
@@ -39,7 +39,14 @@ export default function Header() {
           {NAV.map((n) => (
             <li key={n.id}>
               <a href={`#${n.id}`} aria-current={active === n.id ? 'true' : undefined}>
-                {active === n.id && <motion.span layoutId="nav-active" className="pill-active" transition={{ type: 'spring', stiffness: 420, damping: 36 }} />}
+                {active === n.id && (
+                  <m.span
+                    className="pill-active"
+                    initial={{ opacity: 0, scale: 0.92 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                  />
+                )}
                 <span>{n.label}</span>
               </a>
             </li>

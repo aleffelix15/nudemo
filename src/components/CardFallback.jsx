@@ -58,8 +58,9 @@ export function SvgNuCard({
   name = HOLDER_NAME,
   className = '',
 }) {
+  const variantClass = variant === 1 || variant === 'ultravioleta' ? 'ultravioleta' : 'roxinho'
   return (
-    <div className={`nu-card-2d ${variant} ${className}`} role="img" aria-label={`Cartão Nubank ${name}`}>
+    <div className={`nu-card-2d ${variantClass} ${className}`} role="img" aria-label={`Cartão Nubank ${name}`}>
       <div className="nu-card-2d-sheen" aria-hidden="true" />
       <div className="nu-card-2d-top">
         <div className="nu-card-2d-top-badge">

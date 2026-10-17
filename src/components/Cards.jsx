@@ -1,7 +1,7 @@
 import { lazy, Suspense, useRef, useState } from 'react'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { CARDS } from '../content'
-import CardFallback, { useCardImage } from './CardFallback'
+import CardFallback, { useCardImage, SvgNuCard } from './CardFallback'
 import SceneBoundary from './SceneBoundary'
 import { useDemo } from '../lib/demo'
 import {
@@ -70,7 +70,9 @@ function TiltCard({ variant, name }) {
             decoding="async"
           />
         ) : (
-          <div className="tilt-ph" />
+          <div className="tilt-ph">
+            <SvgNuCard variant={variant} name={name} />
+          </div>
         )}
         <span className="tilt-shadow" aria-hidden="true" />
       </div>
@@ -113,7 +115,7 @@ export default function Cards() {
 
       <ul className="cards-grid">
         {CARDS.items.map((c, i) => (
-          <motion.li
+          <m.li
             key={c.name}
             className="card-col"
             initial={{ opacity: 0, y: 28 }}
@@ -136,7 +138,7 @@ export default function Cards() {
             >
               {CARDS.action}
             </button>
-          </motion.li>
+          </m.li>
         ))}
       </ul>
       <div className="cards-help">

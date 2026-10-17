@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { motion, useScroll, useSpring, useTransform, useMotionValueEvent } from 'framer-motion'
+import { m, useScroll, useSpring, useTransform, useMotionValueEvent } from 'framer-motion'
 import { STEPS } from '../content'
 
 // Linha do tempo vertical que se preenche com o scroll
@@ -18,7 +18,7 @@ export default function Steps() {
     <section className="steps" ref={ref} aria-label="Passo a passo para começar">
       <h2 className="sr-only">Como começar com o Nubank</h2>
       <div className="steps-line" aria-hidden="true">
-        <motion.i style={{ height: h }} />
+        <m.i style={{ height: h }} />
       </div>
       <ol role="list">
         {STEPS.map((s, i) => (

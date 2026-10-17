@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { APP } from '../content'
 import Phone from './Phone'
 import { useDemo } from '../lib/demo'
@@ -81,7 +81,7 @@ export default function AppSection() {
         </div>
 
         {APP.chips.map((c, i) => (
-          <motion.div
+          <m.div
             key={c.title}
             className={`chip-note ${SLOTS[i].cls}`}
             initial={{ opacity: 0, x: SLOTS[i].from }}
@@ -91,7 +91,7 @@ export default function AppSection() {
           >
             <b>{c.title}</b>
             <span>{c.text}</span>
-          </motion.div>
+          </m.div>
         ))}
       </div>
 

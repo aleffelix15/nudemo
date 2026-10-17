@@ -55,6 +55,7 @@ function Ghost({ kit, refObj, index, total }) {
 function Scene({ progress, copies, reduced, running, isMobile, isSmallMobile }) {
   const gl = useThree((s) => s.gl)
   const scene = useThree((s) => s.scene)
+  const camera = useThree((s) => s.camera)
   const invalidate = useThree((s) => s.invalidate)
   const viewport = useThree((s) => s.viewport)
 
@@ -62,12 +63,22 @@ function Scene({ progress, copies, reduced, running, isMobile, isSmallMobile }) 
 
   useEffect(() => {
     const env = applyStudioEnvironment(gl, scene)
-    invalidate()
+    let cancelled = false
+    if (typeof gl.compileAsync === 'function') {
+      gl.compileAsync(scene, camera).then(() => {
+        if (!cancelled) invalidate()
+      }).catch(() => {
+        if (!cancelled) invalidate()
+      })
+    } else {
+      invalidate()
+    }
     return () => {
+      cancelled = true
       scene.environment = null
       disposeStudioEnvironment?.(gl)
     }
-  }, [gl, scene, invalidate])
+  }, [gl, scene, camera, invalidate])
 
   // Desperta a renderização quando running passa para true
   useEffect(() => {
@@ -192,6 +203,10 @@ export default function StackScene({ progress, running, reduced, mobile }) {
         }}
         onCreated={({ gl, invalidate }) => {
           invalidateRef.current = invalidate
+          // Desativa consultas síncronas de validação de shaders em produção para eliminar pausas de GPU no primeiro frame
+          if (gl.debug) {
+            gl.debug.checkShaderErrors = false
+          }
           const dom = gl.domElement
           dom.style.touchAction = 'pan-y'
           if (isCoarse) {

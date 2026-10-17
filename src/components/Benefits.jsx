@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { BENEFITS, MARQUEE } from '../content'
 import Icon from './Icons'
 
@@ -16,7 +16,7 @@ export default function Benefits() {
 
       <ul className="benefit-grid" role="list">
         {BENEFITS.items.map((b, i) => (
-          <motion.li
+          <m.li
             key={b.title}
             initial={{ opacity: 0, scale: 0.97 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -26,7 +26,7 @@ export default function Benefits() {
             <Icon name={b.icon} size={22} />
             <h3>{b.title}</h3>
             <p>{b.text}</p>
-          </motion.li>
+          </m.li>
         ))}
       </ul>
 

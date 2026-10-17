@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { m, useScroll, useTransform } from 'framer-motion'
 import { TRACK } from '../content'
 import Phone from './Phone'
 import { useDemo } from '../lib/demo'
@@ -26,7 +26,7 @@ function Ghost({ i, spread, reduced, mobile }) {
   const yFactor = mobile ? 5 : 11
   const x = useTransform(spread, (s) => -i * factor * (reduced ? 1 : s))
   const y = useTransform(spread, (s) => i * yFactor * (reduced ? 1 : s))
-  return <motion.span className="ghost" style={{ x, y, opacity: 0.42 - i * 0.05 }} aria-hidden="true" />
+  return <m.span className="ghost" style={{ x, y, opacity: 0.42 - i * 0.05 }} aria-hidden="true" />
 }
 
 export default function Track() {
@@ -72,7 +72,7 @@ export default function Track() {
 
       {/* Dispositivo com rastro interativo perfeitamente enquadrado */}
       <div className="track-device">
-        <motion.div className="track-phone" style={reduced ? { rotate: -2 } : { rotate, y: lift }}>
+        <m.div className="track-phone" style={reduced ? { rotate: -2 } : { rotate, y: lift }}>
           <Trail progress={scrollYProgress} reduced={reduced} mobile={mobile} />
           <Phone
             activeTab={activeCat === 2 ? 'cartao' : activeCat === 3 ? 'caixinhas' : 'conta'}
@@ -83,7 +83,7 @@ export default function Track() {
             }}
             alt="Tela inicial do aplicativo Nubank em Modo Escuro"
           />
-        </motion.div>
+        </m.div>
       </div>
 
       {/* Bloco de estatísticas, categorias e benefícios */}

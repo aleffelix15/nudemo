@@ -247,6 +247,15 @@ h3 {
   aspect-ratio: 1 / 1.5858;
   border-radius: 18px;
   background: var(--night-3);
+  overflow: hidden;
+  box-shadow: 0 22px 32px rgba(0, 0, 0, 0.4);
+}
+.tilt-ph .nu-card-2d {
+  width: 100%;
+  height: 100%;
+  transform: none;
+  box-shadow: none;
+  border-radius: 18px;
 }
 .cards-mobile-stage {
   width: 100%;
