@@ -76,7 +76,6 @@ button,
 [role="tab"],
 .app-mode-tab,
 .track-cat-btn,
-.pill-burger,
 .sheet a {
   touch-action: manipulation;
 }
@@ -122,13 +121,10 @@ section {
 .tabular-nums,
 strong,
 b,
-.ps-balance,
-.ps-card strong,
 .hero-notes b,
 .nu-balance-val,
 .nu-invoice-val,
 .nu-loan-val,
-.nu-stat-num,
 [data-tabular] {
   font-variant-numeric: tabular-nums;
 }
